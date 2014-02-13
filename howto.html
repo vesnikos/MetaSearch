@@ -187,8 +187,8 @@ click ok.</p>
 delete and click the &#8216;Delete&#8217; button.  You will be asked to confirm deleting
 the entry.</p>
 <p>MetaSearch allows for loading and saving connections to an XML file.  This is
-useful when you need to share settings between applications.  Below is an example
-of the XML file format.</p>
+useful when you need to share settings between applications.  Below is an
+example of the XML file format.</p>
 <div class="highlight-xml"><div class="highlight"><pre><span class="nt">&lt;qgsCSWConnections</span> <span class="na">version=</span><span class="s">&quot;1.0&quot;</span><span class="nt">&gt;</span>
     <span class="nt">&lt;csw</span> <span class="na">name=</span><span class="s">&quot;data.gov&quot;</span> <span class="na">url=</span><span class="s">&quot;http://demo.pycsw.org/services/csw&quot;</span><span class="nt">/&gt;</span>
     <span class="nt">&lt;csw</span> <span class="na">name=</span><span class="s">&quot;UK Location Catalogue Publishing Service&quot;</span> <span class="na">url=</span><span class="s">&quot;http://csw.data.gov.uk/geonetwork/srv/en/csw&quot;</span><span class="nt">/&gt;</span>
@@ -225,23 +225,21 @@ search, or enter custom values as desired</li>
 </ul>
 <p>Clicking the &#8216;Search&#8217; button will search the Metadata Catalogue.  Search
 results are displayed in a list and are sortable by clicking on the column
-title.  You can navigate through search results with &#8216;First&#8217;, &#8216;Last&#8217;, &#8216;Next&#8217;
-and &#8216;Prev&#8217; buttons.</p>
+title.  You can navigate through search results with the direction buttons
+below the search results.</p>
 <p>Clicking a result will show the record&#8217;s abstract in the &#8216;Abstract&#8217; window and
 provides the following options:</p>
 <ul class="simple">
-<li>clicking the &#8216;Metadata&#8217; button to display record metadata</li>
+<li>double-clicking the record displays the record metadata with any associated
+access links.  Clicking the links opens the link in the user&#8217;s web browser.</li>
 <li>clicking the &#8216;Show XML&#8217; button opens a window with the service response in
 raw XML format</li>
-<li>if record has type &#8220;downloadableData&#8221; and there is a link in the metadata,
-the &#8216;Open URL&#8217; button will be enabled. Pressing this button will open the
-link in the user&#8217;s default browser</li>
-<li>if record has type &#8216;liveData&#8217; and there is a link in the metadata, the
-&#8216;Add to WMS list&#8217; button will be enabled.  When clicking this button
-MetaSearch will verify if this is a valid WMS server.  On success you will
-be asked for name for this server and it will be added to the QGIS WMS
-servers list.  You can then connect to this WMS server by selecting the
-&#8216;Layer / Add WMS/WMTS Layer&#8217; menu item.</li>
+<li>if the record is an OGC web service (WMS, WFS, WCS), the appropriate
+&#8216;Add to WMS|WFS|WCS&#8217; buttons will be enabled for the user to add to QGIS.
+When clicking this button, MetaSearch will verify if this is a valid OWS.
+On success you will be asked for name of this server and it will be added to
+the appropriate QGIS connection list.  You can then connect to the OWS by
+selecting the &#8216;Layer / Add WMS/WMTS Layer|WFS Layer|WCS Layer&#8217; menu item.</li>
 </ul>
 </div>
 </div>
