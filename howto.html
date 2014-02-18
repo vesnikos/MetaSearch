@@ -138,31 +138,31 @@
 <h1>MetaSearch Catalogue Client<a class="headerlink" href="#metasearch-catalogue-client" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>MetaSearch is a QGIS plugin to interact with metadata catalogue services.
-The OGC Catalogue Service (CSW) standard is initially supported.
-Additional catalogue types are planned for future development.</p>
+<p>MetaSearch is a QGIS plugin to interact with metadata catalogue services,
+supporting the OGC Catalogue Service for the Web (CSW) standard.</p>
 <p>MetaSearch provides an easy and intuitive approach and user-friendly interface
 to searching metadata catalogues within QGIS.</p>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>MetaSearch is designed for QGIS 2.0 and higher.  All dependencies are
+<p>MetaSearch is designed for <a class="reference external" href="http://qgis.org">QGIS</a> 2.0 and higher.  All dependencies are
 included within MetaSearch.</p>
 <p>Install MetaSearch from the QGIS plugin manager, or manually from
 <a class="reference external" href="http://plugins.qgis.org/plugins/MetaSearch">http://plugins.qgis.org/plugins/MetaSearch</a>.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">for developers, please see the Developers section for specific
-instructions on on installing MetaSearch.</p>
+<p class="last">developers: please see the <a class="reference external" href="https://github.com/geopython/MetaSearch/blob/master/README.md">README</a> for instructions on
+installing MetaSearch for development.</p>
 </div>
 </div>
 <div class="section" id="working-with-metadata-catalogues-in-qgis">
 <h2>Working with Metadata Catalogues in QGIS<a class="headerlink" href="#working-with-metadata-catalogues-in-qgis" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="csw-catalogue-service-for-the-web">
 <h3>CSW (Catalogue Service for the Web)<a class="headerlink" href="#csw-catalogue-service-for-the-web" title="Permalink to this headline">¶</a></h3>
-<p>CSW (Catalogue Service for the Web) is an OGC (Open Geospatial Consortium)
-specification, that defines common interfaces to discover, browse, and query
-metadata about data, services, and other potential resources.</p>
+<p><a class="reference external" href="http://opengeospatial.org/standards/cat">CSW (Catalogue Service for the Web)</a> is an
+<a class="reference external" href="http://opengeospatial.org">OGC (Open Geospatial Consortium)</a> specification, that defines common
+interfaces to discover, browse, and query metadata about data, services,
+and other potential resources.</p>
 </div>
 <div class="section" id="startup">
 <h3>Startup<a class="headerlink" href="#startup" title="Permalink to this headline">¶</a></h3>
@@ -212,17 +212,17 @@ Capabilities XML.</p>
 </div>
 <div class="section" id="searching-catalogue-services">
 <h3>Searching Catalogue Services<a class="headerlink" href="#searching-catalogue-services" title="Permalink to this headline">¶</a></h3>
-<a class="reference internal image-reference" href="_images/metasearch-search.png"><img alt="Searching Catalogue Services" class="align-left" src="_images/metasearch-search.png" style="width: 289.6px; height: 405.6px;" /></a>
+<a class="reference internal image-reference" href="_images/metasearch-search.png"><img alt="Searching Catalogue Services" class="align-right" src="_images/metasearch-search.png" style="width: 289.6px; height: 405.6px;" /></a>
 <p>The &#8216;Search&#8217; tab allows the user to query Catalogue Services for data and
 services, set various search parameters and view results.</p>
 <p>The following search parameters are available:</p>
 <ul class="simple">
-<li><em>Keywords</em>: free text search keywords</li>
-<li><em>From</em>: the Catalogue Service to perform the query against</li>
-<li><em>Bounding box</em>: the spatial area of interest to filter on.  The default
+<li><strong>Keywords</strong>: free text search keywords</li>
+<li><strong>From</strong>: the Catalogue Service to perform the query against</li>
+<li><strong>Bounding box</strong>: the spatial area of interest to filter on.  The default
 bounding box is the map view / canvas.  Click &#8216;Set global&#8217; to do a global
 search, or enter custom values as desired</li>
-<li><em>Records</em>: the number of records to return when searching.  Default is
+<li><strong>Records</strong>: the number of records to return when searching.  Default is
 10 records</li>
 </ul>
 <p>Clicking the &#8216;Search&#8217; button will search the selected Metadata Catalogue.
@@ -243,7 +243,7 @@ When clicking this button, MetaSearch will verify if this is a valid OWS.
 The OWS will then be added to the appropriate QGIS connection list, and the
 appropriate WMS/WMTS|WFS|WCS connection dialogue will then appear</li>
 </ul>
-<a class="reference internal image-reference" href="_images/metasearch-record-metadata.png"><img alt="project logo" class="align-right" src="_images/metasearch-record-metadata.png" style="width: 375.0px; height: 405.0px;" /></a>
+<a class="reference internal image-reference" href="_images/metasearch-record-metadata.png"><img alt="Metadata Record Display" class="align-right" src="_images/metasearch-record-metadata.png" style="width: 375.0px; height: 405.0px;" /></a>
 </div>
 </div>
 <div class="section" id="support">
@@ -252,7 +252,7 @@ appropriate WMS/WMTS|WFS|WCS connection dialogue will then appear</li>
 <li>Mailing list: <a class="reference external" href="http://lists.osgeo.org/listinfo/qgis-user">http://lists.osgeo.org/listinfo/qgis-user</a></li>
 <li>IRC: <a class="reference external" href="irc://irc.freenode.net/qgis">irc://irc.freenode.net/qgis</a></li>
 <li>Issue tracker: <a class="reference external" href="https://github.com/geopython/MetaSearch/issues">https://github.com/geopython/MetaSearch/issues</a></li>
-<li>Source code: <a class="reference external" href="https://github.com/geopython/MetaSearch/">https://github.com/geopython/MetaSearch/</a></li>
+<li>Source code: <a class="reference external" href="https://github.com/geopython/MetaSearch">https://github.com/geopython/MetaSearch</a></li>
 <li>Wiki: <a class="reference external" href="https://github.com/geopython/MetaSearch/wiki">https://github.com/geopython/MetaSearch/wiki</a></li>
 </ul>
 </div>
