@@ -35,7 +35,7 @@ from urllib2 import build_opener, install_opener, ProxyHandler
 from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT
 from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
                          QDialogButtonBox, QMessageBox, QTreeWidgetItem,
-                         QWidget)
+                         QWidget, QDockWidget)
 
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
@@ -59,15 +59,19 @@ from MetaSearch.util import (get_connections_from_file, highlight_xml,
 from MetaSearch.ui.maindialog import Ui_MetaSearchDialog
 
 
-class MetaSearchDialog(QDialog, Ui_MetaSearchDialog):
+#class MetaSearchDialog(QDialog, Ui_MetaSearchDialog):
+class MetaSearchDialog(QDockWidget, Ui_MetaSearchDialog):
     """main dialogue"""
     def __init__(self, iface):
         """init window"""
 
-        QDialog.__init__(self)
+        #QDialog.__init__(self)
+        QDockWidget.__init__(self)
         self.setupUi(self)
 
         self.iface = iface
+        #self.iface.addDockWidget(Qt.AllDockWidgetAreas, self)
+        self.iface.addDockWidget(Qt.BottomDockWidgetArea, self)
         self.map = iface.mapCanvas()
         self.settings = QSettings()
         self.catalog = None
@@ -104,11 +108,11 @@ class MetaSearchDialog(QDialog, Ui_MetaSearchDialog):
         self.btnSearch.clicked.connect(self.search)
         self.leKeywords.returnPressed.connect(self.search)
         # prevent dialog from closing upon pressing enter
-        self.buttonBox.button(QDialogButtonBox.Close).setAutoDefault(False)
+        #self.buttonBox.button(QDialogButtonBox.Close).setAutoDefault(False)
         # launch help from button
-        self.buttonBox.helpRequested.connect(self.help)
-        self.btnCanvasBbox.clicked.connect(self.set_bbox_from_map)
-        self.btnGlobalBbox.clicked.connect(self.set_bbox_global)
+        #self.buttonBox.helpRequested.connect(self.help)
+        #self.btnCanvasBbox.clicked.connect(self.set_bbox_from_map)
+        #self.btnGlobalBbox.clicked.connect(self.set_bbox_global)
 
         # navigation buttons
         self.btnFirst.clicked.connect(self.navigate)

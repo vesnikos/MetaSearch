@@ -114,7 +114,8 @@ class MetaSearchPlugin(object):
     def run(self):
         """open MetaSearch"""
 
-        self.dialog.exec_()
+        #self.dialog.exec_()
+        self.dialog.show()
 
     def help(self):
         """open help in user's default web browser"""
