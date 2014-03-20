@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Katalogový klient MetaSearch &mdash; Dokumentace pro MetaSearch 0.1-dev</title>
+    
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-3.0.0/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-3.0.0/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1-dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="Dokumentace pro MetaSearch 0.1-dev" href="index.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="Katalogový klient MetaSearch" href="index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          MetaSearch</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1-dev</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            <li class="divider-vertical"></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a href="index.html"
+     class="dropdown-toggle"
+     data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+    ><ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">Katalogový klient MetaSearch</a><ul>
+<li><a class="reference internal" href="#introduction">Úvod</a></li>
+<li><a class="reference internal" href="#installation">Instalace</a></li>
+<li><a class="reference internal" href="#working-with-metadata-catalogues-in-qgis">Práce s metadatovými katalogy v QGIS</a><ul>
+<li><a class="reference internal" href="#csw-catalogue-service-for-the-web">CS-W (Catalogue Service for the Web)</a></li>
+<li><a class="reference internal" href="#startup">Spuštění</a></li>
+<li><a class="reference internal" href="#managing-catalogue-services">Správa katalogových služeb</a></li>
+<li><a class="reference internal" href="#searching-catalogue-services">Vyhledávání v katalogových službách</a></li>
+<li><a class="reference internal" href="#settings">Nastavení</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#support">Podpora</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="index.html" title="Previous Chapter: Katalogový klient MetaSearch"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; Katalogový klien...</span>
+    </a>
+  </li>
+  <li>
+    <a href="license.html" title="Next Chapter: License"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm">License &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+
+<ul class="nav navbar-nav">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Language <b class="caret"></b></a>
+    <ul class="dropdown-menu localtoc">
+      <ul>
+        <li><a class="reference internal" href="/MetaSearch/howto.html" title="English">English</a></li>
+        <li><a class="reference internal" href="/MetaSearch/cs/howto.html" title="Czech">&#268;e&#353;tina</a></li>
+        <li><a class="reference internal" href="/MetaSearch/de/howto.html" title="German">Deutsch</a></li>
+        <li><a class="reference internal" href="/MetaSearch/fr/howto.html" title="French">Fran&ccedil;ais</a></li>
+        <li><a class="reference internal" href="/MetaSearch/it/howto.html" title="Italian">Italiano</a></li>
+        <li><a class="reference internal" href="/MetaSearch/nl/howto.html" title="Dutch">Nederlands</a></li>
+      </ul>
+    </ul>
+  </li>
+</ul>
+
+
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
+  <div class="section" id="metasearch-catalogue-client">
+<h1>Katalogový klient MetaSearch<a class="headerlink" href="#metasearch-catalogue-client" title="Trvalý odkaz na tento nadpis">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Úvod<a class="headerlink" href="#introduction" title="Trvalý odkaz na tento nadpis">¶</a></h2>
+<p>MetaSearch je zásuvný modul pro program QGIS. Je to katalogový klient, podporující standard OGC Catalogue Service for the Web (CS-W).</p>
+<p>MetaSearch poskytuje pomocí uživatelsky přítulného rozhraní jednoduchý a intuitivní způsob, jak prohledávat katalogové služby v prostředí QGIS.</p>
+</div>
+<div class="section" id="installation">
+<h2>Instalace<a class="headerlink" href="#installation" title="Trvalý odkaz na tento nadpis">¶</a></h2>
+<p>MetaSearch je připraven pro <cite>QGIS</cite> _2.0 nebo vyšší. Všechny závislosti jsou   v MetaSearch přítomny.</p>
+<p>Nainstalujte MetaSearch pomocí správce zásuvných modulů QGIS nebo ručně z <a class="reference external" href="http://plugins.qgis.org/plugins/MetaSearch">http://plugins.qgis.org/plugins/MetaSearch</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Poznámka</p>
+<p class="last">vývojáři: přeštěte si prosím <a class="reference external" href="https://github.com/geopython/MetaSearch/blob/master/README.md">README</a> pro instrukce, jak nainstalovat MetaSearch pro vývoj.</p>
+</div>
+</div>
+<div class="section" id="working-with-metadata-catalogues-in-qgis">
+<h2>Práce s metadatovými katalogy v QGIS<a class="headerlink" href="#working-with-metadata-catalogues-in-qgis" title="Trvalý odkaz na tento nadpis">¶</a></h2>
+<div class="section" id="csw-catalogue-service-for-the-web">
+<h3>CS-W (Catalogue Service for the Web)<a class="headerlink" href="#csw-catalogue-service-for-the-web" title="Trvalý odkaz na tento nadpis">¶</a></h3>
+<p><a class="reference external" href="http://www.opengeospatial.org/standards/cat">CSW (Catalogue Service for the Web)</a>  je specifikace <a class="reference external" href="http://www.opengeospatial.org">OGC (Open Geospatial Consortium)</a>, definující rozhraní pro vyhledávání, prohlížení a dotazování se na metadata dat, služeb a dalších možných zdrojů.</p>
+</div>
+<div class="section" id="startup">
+<h3>Spuštění<a class="headerlink" href="#startup" title="Trvalý odkaz na tento nadpis">¶</a></h3>
+<p>Pro spuštění MetaSearch, klikněte na jeho ikonu nebo zvolte Web / MetaSearch / MetaSearch z hlavního menu QGIS. Objeví se dialog MetaSearch. Hlavní okno má dvě záložky: &#8216;Služby&#8217; a &#8216;Vyhledávání&#8217;.</p>
+</div>
+<div class="section" id="managing-catalogue-services">
+<h3>Správa katalogových služeb<a class="headerlink" href="#managing-catalogue-services" title="Trvalý odkaz na tento nadpis">¶</a></h3>
+<a class="reference internal image-reference" href="../_images/metasearch-services.png"><img alt="Managing Catalogue Services" class="align-right" src="../_images/metasearch-services.png" style="width: 289.6px; height: 405.6px;" /></a>
+<p>Záložka &#8216;Služby&#8217; umožňuje uživateli spravovat všechny dostupné katalogové služby. MetaSearch poskytuje výchozí list katalogových služeb. Ty mohou být automaticky přidány stisknutím tlačítka &#8216;Přidat výchozí služby&#8217;.</p>
+<p>Zobrazte rolovací nabídku pro všchny záznamy katalogových služeb.</p>
+<p>Pro přidání záznamu katalogové služby, klikněte na tlačítko &#8216;Nový&#8217; a zadejte jeho název a URL/koncový bod. Požadováno je pouze základní URL (ne plný dotaz GetCapabilities). Po potvrzení bude služba přidána do seznamu záznamů.</p>
+<p>Pro editaci existujícího záznamu katalogové služby vyberte záznam, který chcete editovat, klikněte na tlačítko &#8216;Editovat&#8217;, změňte hodnoty Názevu a URL a potvrďte.</p>
+<p>Pro smazání záznamu katalogové služby vyberte záznam, který chcete smazat a klikněte na  tlačítko &#8216;Smazat&#8217;. Pro odstranění záznamu je potřeba požadavek potvrdit.</p>
+<p>MetaSearch umožňuje načtení a uložení připojení do souboru XML. To se může hodit, pokud plánujete sdílet nastavení mezi různými aplikacemi. Níže uvádíme příklad formátu souboru XML.</p>
+<div class="highlight-python"><div class="highlight"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;qgsCSWConnections version=&quot;1.0&quot;&gt;
+    &lt;csw name=&quot;Geonorge - National CSW service for Norway&quot; url=&quot;http://www.geonorge.no/geonetwork/srv/eng/csw&quot;/&gt;
+    &lt;csw name=&quot;LINZ Data Service&quot; url=&quot;http://data.linz.govt.nz/feeds/csw&quot;/&gt;
+    &lt;csw name=&quot;Nationaal Georegister (Nederland)&quot; url=&quot;http://www.nationaalgeoregister.nl/geonetwork/srv/eng/csw&quot;/&gt;
+    &lt;csw name=&quot;UK Location Catalogue Publishing Service&quot; url=&quot;http://csw.data.gov.uk/geonetwork/srv/en/csw&quot;/&gt;
+    &lt;csw name=&quot;UNEP/GRID-Geneva Metadata Catalog&quot; url=&quot;http://metadata.grid.unep.ch:8080/geonetwork/srv/eng/csw&quot;/&gt;
+&lt;/qgsCSWConnections&gt;
+</pre></div>
+</div>
+<p>Pro načtení seznamu záznamů klikněte na tlačítko &#8216;Načíst&#8217;. V nově objeveném okně klikněte na tlačítko &#8216;Procházet&#8217; a vyberte soubor XML záznamů, které chcete načíst. Nakonec klikněte na &#8216;Otevřít&#8217;. Zobrazí se seznam záznamů. Z tohoto seznamu vyberte záznamy, které chcete přidat a klikněte na &#8216;Načíst&#8217;.</p>
+<p>Tlačítko &#8216;Informace o službě&#8217; zobrazí informace o vybrané katalogové službě, jako její identifikaci, poskytovatele služby a kontaktní informace. Pokud chcete zobrazit odpověď ve formátu XML, klikněte na tlačítko &#8216;Odpověď GetCapabilities&#8217;. Capabilities XML se zobrazí v nové okně.</p>
+</div>
+<div class="section" id="searching-catalogue-services">
+<h3>Vyhledávání v katalogových službách<a class="headerlink" href="#searching-catalogue-services" title="Trvalý odkaz na tento nadpis">¶</a></h3>
+<a class="reference internal image-reference" href="../_images/metasearch-search.png"><img alt="Searching Catalogue Services" class="align-right" src="../_images/metasearch-search.png" style="width: 289.6px; height: 405.6px;" /></a>
+<p>Záložka &#8216;Vyhledávat&#8217; umožňuje uživateli dotazovat se katalogových služeb na data a služby, nastavit různé parametry hledání a zobrazovat jeho výsledky.</p>
+<p>K dispozici jsou následující parametry vyhledávání:</p>
+<ul class="simple">
+<li><p class="first"><strong>Kláčová slova</strong>: textové řetězce klíčových slov</p>
+</li>
+<li><p class="first"><strong>Od</strong>: katalogová služba, proti které bude dotaz proveden</p>
+</li>
+<li><p class="first"><strong>Geografické ohraničení</strong>: rozsah souřadnic zájmového území. Výchozí ohraničení je výřez mapy. Kliknutím na &#8216;Nastavit globální&#8217; se omezení zruší. Zadat můžete i vlastní hodnoty, pokud je to potřeba.</p>
+</li>
+<li><p class="first"><strong>Záznamy</strong>: maximální počet záznamů, které služba v průběhu vyhledávání vrátí. Výchozí je 10 záznamů</p>
+</li>
+</ul>
+<p>Po kliknutí na tlačítko &#8216;Vyhledat&#8217; bude prohledán metadatový katalog. Výsledek hledání je zobrazen jako seznam, který lze setřídit kliknutím na hlavičku sloupce. V seznamu se lze navigovat pomocí tlačítkem pod seznamem. Tlačítko &#8216;Zobrazit výsledkyjako XML&#8217; otevře okno s odpovědí v původním formátu XML.</p>
+<p>Kliknutím na výsledek se zobrazí abstrakt záznamu v okně &#8216;Abstrakt&#8217;. Toto okno poskytuje následující volby:</p>
+<ul class="simple">
+<li><p class="first">pokud je součástí metadatového záznamu geografické ohraničení, otisk tohoto ohraničení se zobrazí v mapě</p>
+</li>
+<li><p class="first">dvojkliknutím na záznam se zobrazí jeho metadata se všemi sdruženými odkazy. Kliknutím na odkaz bude tento otevřen ve webovém prohlížeči.</p>
+</li>
+<li><p class="first">Pokud je záznam webová služba OGC (WMS/WMTS, WFS, WCS), bude tlačítko &#8216;Přidat WMS/WMTS|WFS|WCS&#8217; zaktivováno, čímž se umožní její přidání do QGIS. Po kliknutí na toto tlačítko MetaSearch ověří platnost služby. Služba OWS bude následně přidána do patřičného senzamu připojení v rámci QGIS a zobrazí připojovací dialogové okno pro WMS/WMTS|WFS|WCS.</p>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/metasearch-record-metadata.png"><img alt="Metadata Record Display" class="align-right" src="../_images/metasearch-record-metadata.png" style="width: 375.0px; height: 405.0px;" /></a>
+</div>
+<div class="section" id="settings">
+<h3>Nastavení<a class="headerlink" href="#settings" title="Trvalý odkaz na tento nadpis">¶</a></h3>
+<p>Vyladit nastavení MetaSearch můžete pomocí následujících voleb:</p>
+<ul class="simple">
+<li><p class="first"><strong>Pojmenování připojení</strong>: pokud přidáváte připojení služby OWS (WMS/WMTS|WFS|WCS), je toto připojení uloženo jako vrstva QGIS. Toto nastavení použijte, pokud chcete použít název z Capabilities XML nebo pokud chcete použít dočasný název nebo přepsat vlastní.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="support">
+<h2>Podpora<a class="headerlink" href="#support" title="Trvalý odkaz na tento nadpis">¶</a></h2>
+<ul class="simple">
+<li>Mailing list: <a class="reference external" href="http://lists.osgeo.org/listinfo/qgis-user">http://lists.osgeo.org/listinfo/qgis-user</a></li>
+<li>IRC: <a class="reference external" href="irc://irc.freenode.net/qgis">irc://irc.freenode.net/qgis</a></li>
+<li><p class="first">Tracker: <a class="reference external" href="https://github.com/geopython/MetaSearch/issues">https://github.com/geopython/MetaSearch/issues</a></p>
+</li>
+<li><p class="first">Zdrojový kód: <a class="reference external" href="https://github.com/geopython/MetaSearch">https://github.com/geopython/MetaSearch</a></p>
+</li>
+<li>Wiki: <a class="reference external" href="https://github.com/geopython/MetaSearch/wiki">https://github.com/geopython/MetaSearch/wiki</a></li>
+</ul>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014, Tom Kralidis.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

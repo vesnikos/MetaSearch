@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Client MetaSearch per i servizi di catalogazione &mdash; MetaSearch 0.1-dev documentazione</title>
+    
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-3.0.0/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-3.0.0/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1-dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="MetaSearch 0.1-dev documentazione" href="index.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="Client Catalogo MetaSearch" href="index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          MetaSearch</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1-dev</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            <li class="divider-vertical"></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a href="index.html"
+     class="dropdown-toggle"
+     data-toggle="dropdown">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+    ><ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"><ul>
+<li><a class="reference internal" href="#">Client MetaSearch per i servizi di catalogazione</a><ul>
+<li><a class="reference internal" href="#introduction">Introduzione</a></li>
+<li><a class="reference internal" href="#installation">Installazione</a></li>
+<li><a class="reference internal" href="#working-with-metadata-catalogues-in-qgis">Lavorare con i cataloghi di metadati in QGIS</a><ul>
+<li><a class="reference internal" href="#csw-catalogue-service-for-the-web">CSW (Catalogue Service for the Web)</a></li>
+<li><a class="reference internal" href="#startup">Avvio</a></li>
+<li><a class="reference internal" href="#managing-catalogue-services">Gestione servizi catalogazione</a></li>
+<li><a class="reference internal" href="#searching-catalogue-services">Ricerca servizi di catalogazione</a></li>
+<li><a class="reference internal" href="#settings">Impostazioni</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#support">Supporto</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="index.html" title="Previous Chapter: Client Catalogo MetaSearch"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm">&laquo; Client Catalogo ...</span>
+    </a>
+  </li>
+  <li>
+    <a href="license.html" title="Next Chapter: License"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm">License &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+
+<ul class="nav navbar-nav">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Language <b class="caret"></b></a>
+    <ul class="dropdown-menu localtoc">
+      <ul>
+        <li><a class="reference internal" href="/MetaSearch/howto.html" title="English">English</a></li>
+        <li><a class="reference internal" href="/MetaSearch/cs/howto.html" title="Czech">&#268;e&#353;tina</a></li>
+        <li><a class="reference internal" href="/MetaSearch/de/howto.html" title="German">Deutsch</a></li>
+        <li><a class="reference internal" href="/MetaSearch/fr/howto.html" title="French">Fran&ccedil;ais</a></li>
+        <li><a class="reference internal" href="/MetaSearch/it/howto.html" title="Italian">Italiano</a></li>
+        <li><a class="reference internal" href="/MetaSearch/nl/howto.html" title="Dutch">Nederlands</a></li>
+      </ul>
+    </ul>
+  </li>
+</ul>
+
+
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      
+  <div class="section" id="metasearch-catalogue-client">
+<h1>Client MetaSearch per i servizi di catalogazione<a class="headerlink" href="#metasearch-catalogue-client" title="link permanente per questa intestazione">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduzione<a class="headerlink" href="#introduction" title="link permanente per questa intestazione">¶</a></h2>
+<p>MetaSearch è un plugin di QGis per interfacciarsi con i servizi di catalogazione metadati, con il supporto dello standard Catalogue Service for the Web (CSW) dell&#8217;OGC.</p>
+<p>MetaSearch offre un approccio semplice ed intuitivo con un&#8217;interfaccia user-friendly per effettuare ricerche in cataloghi di metadati all&#8217;interno di QGIS.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installazione<a class="headerlink" href="#installation" title="link permanente per questa intestazione">¶</a></h2>
+<p>MetaSearch è progettato per <a class="reference external" href="http://qgis.org/en/site/">QGIS</a> 2.0 e superiori. Tutte le dipendenze sono incluse in MetaSearch.</p>
+<p>Installa MetaSearch dal gestore di plugin di QGIS o manualmente da <a class="reference external" href="http://plugins.qgis.org/plugins/MetaSearch">http://plugins.qgis.org/plugins/MetaSearch</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Nota</p>
+<p class="last">sviluppatori: per favore leggete il file <a class="reference external" href="https://github.com/geopython/MetaSearch/blob/master/README.md">README</a> per le istruzioni su come installare MetaSearch per lo sviluppo.</p>
+</div>
+</div>
+<div class="section" id="working-with-metadata-catalogues-in-qgis">
+<h2>Lavorare con i cataloghi di metadati in QGIS<a class="headerlink" href="#working-with-metadata-catalogues-in-qgis" title="link permanente per questa intestazione">¶</a></h2>
+<div class="section" id="csw-catalogue-service-for-the-web">
+<h3>CSW (Catalogue Service for the Web)<a class="headerlink" href="#csw-catalogue-service-for-the-web" title="link permanente per questa intestazione">¶</a></h3>
+<p><a class="reference external" href="http://www.opengeospatial.org/standards/cat">CSW (Catalogue Service for the Web)</a> è una specifica del <a class="reference external" href="http://www.opengeospatial.org">OGC (Open Geospatial Consortium)</a>, che definisce un&#8217;interfaccia comune per scoprire, esplorare ed interrogare metadati associati a dati, servizi ed altre possibili risorse.</p>
+</div>
+<div class="section" id="startup">
+<h3>Avvio<a class="headerlink" href="#startup" title="link permanente per questa intestazione">¶</a></h3>
+<p>Per avviare MetaSearch, fare click sull&#8217;icona MetaSearch oppure selezionare il menù Web / MetaSearch / MetaSearch nella barra dei menu di QGIS. L&#8217;interfaccia di MetaSearch apparirà. La schermata principale è composta da due sezioni: &#8216;Servizi&#8217; e &#8216;Ricerca&#8217;.</p>
+</div>
+<div class="section" id="managing-catalogue-services">
+<h3>Gestione servizi catalogazione<a class="headerlink" href="#managing-catalogue-services" title="link permanente per questa intestazione">¶</a></h3>
+<a class="reference internal image-reference" href="../_images/metasearch-services.png"><img alt="Managing Catalogue Services" class="align-right" src="../_images/metasearch-services.png" style="width: 289.6px; height: 405.6px;" /></a>
+<p>La sezione &#8216;Servizi&#8217; permette all&#8217;utente di gestire tutti i servizi di catalogazione disponibili. MetaSearch offre una lista di servizi predefiniti, che possono essere aggiunti premendo il pulsante &#8216;Aggiungi servizi predefiniti&#8217;.</p>
+<p>Per l&#8217;elenco di tutti i servizi di catalogazione, fare click sul menu a scomparsa.</p>
+<p>Per aggiungere un servizio di catalogazione, fare click sul bottone &#8216;Nuovo&#8217; ed inserire un nome per il servizio ed il relativo indirizzo Web. Nota che è necessario solamente la base dell&#8217;indirizzo Web (non l&#8217;URL completo per il GetCapabilities). Facendo click su ok il servizio sarà aggiunto all&#8217;elenco.</p>
+<p>Per modificare un servizio di catalogazione esistente, sceglierlo dall&#8217;elenco e premere il pulsante &#8216;Modifica&#8217;. Modificare Nome ed indirizzo Web e premere ok.</p>
+<p>Per cancellare un servizio di catalogazione esistente, sceglierlo e premere il pulsante &#8216;Cancella&#8217;. Verrà richiesta ulteriore conferma alla cancellazione.</p>
+<p>MetaSearch permette di caricare e salvare le connessioni usando un file XML. Questo è utile quando si devono condividere le informazioni tra più applicazioni. Segue un esempio del formato XML per questo tipo di impostazioni.</p>
+<div class="highlight-python"><div class="highlight"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;qgsCSWConnections version=&quot;1.0&quot;&gt;
+    &lt;csw name=&quot;Geonorge - National CSW service for Norway&quot; url=&quot;http://www.geonorge.no/geonetwork/srv/eng/csw&quot;/&gt;
+    &lt;csw name=&quot;LINZ Data Service&quot; url=&quot;http://data.linz.govt.nz/feeds/csw&quot;/&gt;
+    &lt;csw name=&quot;Nationaal Georegister (Nederland)&quot; url=&quot;http://www.nationaalgeoregister.nl/geonetwork/srv/eng/csw&quot;/&gt;
+    &lt;csw name=&quot;UK Location Catalogue Publishing Service&quot; url=&quot;http://csw.data.gov.uk/geonetwork/srv/en/csw&quot;/&gt;
+    &lt;csw name=&quot;UNEP/GRID-Geneva Metadata Catalog&quot; url=&quot;http://metadata.grid.unep.ch:8080/geonetwork/srv/eng/csw&quot;/&gt;
+&lt;/qgsCSWConnections&gt;
+</pre></div>
+</div>
+<p>Per caricare un elenco di connessioni, fare click sul pulsante &#8216;Carica&#8217;. Una nuova finestra verrà mostrata; fare click sul pulsante &#8216;Esplora&#8217; per ricercare la posizione del file da aprire e premere &#8216;Apri&#8217;. L&#8217;elenco degli elementi presenti verrà mostrato. Scegli gli elementi da aggiungere e premi &#8216;Carica&#8217;.</p>
+<p>Il pulsante &#8216;Informazioni sul servizio&#8217; mostra informazioni sul servizio di catalogazione selezionato come identificativo, fornitore del servizio ed informazioni di contatto. Se vuoi vedere questa informazione in formato XML, fare click sul pulsante &#8216;Risposta GetCapabilities&#8217;. Una nuova finestra mostrerà il il file XML contenente le Capabilitie.</p>
+</div>
+<div class="section" id="searching-catalogue-services">
+<h3>Ricerca servizi di catalogazione<a class="headerlink" href="#searching-catalogue-services" title="link permanente per questa intestazione">¶</a></h3>
+<a class="reference internal image-reference" href="../_images/metasearch-search.png"><img alt="Searching Catalogue Services" class="align-right" src="../_images/metasearch-search.png" style="width: 289.6px; height: 405.6px;" /></a>
+<p>La sezione &#8216;Ricerca&#8217; permette all&#8217;utente di interrogare servizi di catalogazione per dati e servizi, impostare parametri di ricerca e visualizzare i risultati.</p>
+<p>Sono disponibili i seguenti parametri di ricerca:</p>
+<ul class="simple">
+<li><p class="first"><strong>Parole chiave</strong>: ricerca testuale sulle parole chiave</p>
+</li>
+<li><p class="first"><strong>Da</strong>: il servizio di catalogazione da interrogare</p>
+</li>
+<li><p class="first"><strong>Estensione geografica</strong>: l&#8217;estensione da utilizzare come filtro per la ricerca. L&#8217;impostazione di default corrisponde a quella visualizzata nella mappa. Selezionando &#8216;Imposta globale&#8217; per effettuare una ricerca senza limiti, oppure inserisci valori arbitrari.</p>
+</li>
+<li><p class="first"><strong>Record</strong>: il numero di record da mostrare quando si esegue una ricerca. Il valore di default è 10.</p>
+</li>
+</ul>
+<p>Cliccando il pulsante &#8216;Ricerca&#8217; verrà effettuata una ricerca nel catalogo selezionato. I risultati sono mostrati come lista e possono essere ordinati cliccando sul nome della colonna. Puoi esplorare i risultati della ricerca utilizzando i pulsanti sotto la finestra dei risultati.  Cliccando &#8216;Visualizza i risultati di ricerca come XML&#8217; si aprirà una finestra con la riposta del servizio in formato XML.</p>
+<p>Selezionando un risultato ne verrà mostrato il riassunto nella finestra &#8216;Riassunto&#8217; e saranno disponibili le seguenti opzioni:</p>
+<ul class="simple">
+<li><p class="first">se il metadato ha un&#8217;estensione geografica associata, ne verranno mostrati i limiti nella mappa</p>
+</li>
+<li><p class="first">doppio click su un record ne mostra i metadati con qualsiasi collegamento di accesso associato. Cliccando su un link questo verrà aperto all&#8217;interno del browser</p>
+</li>
+<li><p class="first">se il record è un web service dell&#8217;OGC (WMS/WMTS, WFS, WCS), il relativo pulsante &#8216;Aggiungi WMS/WMTS|WFS|WCS&#8217; verrà abilitato per permettere all&#8217;utente di aggiungerlo in QGIS. Quando si fa click su questo pulsante, MetaSearch verificherà che sia un valido servizio OWS. A questo punto il servizio verrà aggiunto nel relativo elenco di connessioni in QGIS e verrà mostrata la schermata di connessione a WMS/WMTS|WFS|WCS.</p>
+</li>
+</ul>
+<a class="reference internal image-reference" href="../_images/metasearch-record-metadata.png"><img alt="Metadata Record Display" class="align-right" src="../_images/metasearch-record-metadata.png" style="width: 375.0px; height: 405.0px;" /></a>
+</div>
+<div class="section" id="settings">
+<h3>Impostazioni<a class="headerlink" href="#settings" title="link permanente per questa intestazione">¶</a></h3>
+<p>Puoi ottimizzare MetaSearch con le seguenti impostazioni:</p>
+<ul class="simple">
+<li><p class="first"><strong>Nomi connessioni</strong>:</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="support">
+<h2>Supporto<a class="headerlink" href="#support" title="link permanente per questa intestazione">¶</a></h2>
+<ul class="simple">
+<li><p class="first">Lista di discussione: <a class="reference external" href="http://lists.osgeo.org/listinfo/qgis-user">http://lists.osgeo.org/listinfo/qgis-user</a></p>
+</li>
+<li>IRC: <a class="reference external" href="irc://irc.freenode.net/qgis">irc://irc.freenode.net/qgis</a></li>
+<li><p class="first">Segnalazione problemi: <a class="reference external" href="https://github.com/geopython/MetaSearch/issues">https://github.com/geopython/MetaSearch/issues</a></p>
+</li>
+<li><p class="first">Codice sorgente: <a class="reference external" href="https://github.com/geopython/MetaSearch">https://github.com/geopython/MetaSearch</a></p>
+</li>
+<li>Wiki: <a class="reference external" href="https://github.com/geopython/MetaSearch/wiki">https://github.com/geopython/MetaSearch/wiki</a></li>
+</ul>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2014, Tom Kralidis.<br/>
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.1.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

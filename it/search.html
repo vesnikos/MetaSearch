@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -6,13 +5,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; MetaSearch 0.1-dev documentation</title>
+    <title>Cerca &mdash; MetaSearch 0.1-dev documentazione</title>
     
-    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.0.0/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-3.0.0/css/bootstrap-theme.min.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-3.0.0/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-3.0.0/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -23,18 +22,25 @@
         HAS_SOURCE:  true
       };
     </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-1.9.1.min.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="MetaSearch 0.1-dev documentation" href="index.html" />
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <script type="text/javascript" src="../_static/searchtools.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="MetaSearch 0.1-dev documentazione" href="index.html" />
+  <script type="text/javascript">
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+  
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+
 
   </head>
   <body>
@@ -91,13 +97,6 @@
           
 
             
-<form class="navbar-form navbar-right" action="search.html" method="get">
- <div class="form-group">
-  <input type="text" name="q" class="form-control" placeholder="Search" />
- </div>
-  <input type="hidden" name="check_keywords" value="yes" />
-  <input type="hidden" name="area" value="default" />
-</form>
           
 
 <ul class="nav navbar-nav">
@@ -105,12 +104,12 @@
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Language <b class="caret"></b></a>
     <ul class="dropdown-menu localtoc">
       <ul>
-        <li><a class="reference internal" href="/MetaSearch/genindex.html" title="English">English</a></li>
-        <li><a class="reference internal" href="/MetaSearch/cs/genindex.html" title="Czech">&#268;e&#353;tina</a></li>
-        <li><a class="reference internal" href="/MetaSearch/de/genindex.html" title="German">Deutsch</a></li>
-        <li><a class="reference internal" href="/MetaSearch/fr/genindex.html" title="French">Fran&ccedil;ais</a></li>
-        <li><a class="reference internal" href="/MetaSearch/it/genindex.html" title="Italian">Italiano</a></li>
-        <li><a class="reference internal" href="/MetaSearch/nl/genindex.html" title="Dutch">Nederlands</a></li>
+        <li><a class="reference internal" href="/MetaSearch/search.html" title="English">English</a></li>
+        <li><a class="reference internal" href="/MetaSearch/cs/search.html" title="Czech">&#268;e&#353;tina</a></li>
+        <li><a class="reference internal" href="/MetaSearch/de/search.html" title="German">Deutsch</a></li>
+        <li><a class="reference internal" href="/MetaSearch/fr/search.html" title="French">Fran&ccedil;ais</a></li>
+        <li><a class="reference internal" href="/MetaSearch/it/search.html" title="Italian">Italiano</a></li>
+        <li><a class="reference internal" href="/MetaSearch/nl/search.html" title="Dutch">Nederlands</a></li>
       </ul>
     </ul>
   </li>
@@ -125,13 +124,31 @@
   <div class="row">
     <div class="col-md-12">
       
+  <h1 id="search-documentation">Cerca</h1>
+  <div id="fallback" class="admonition warning">
+  <script type="text/javascript">$('#fallback').hide();</script>
+  <p>
+    Attiva JavaScript per abilitare la funzione⏎
+di ricerca.
+  </p>
+  </div>
+  <p>
+    Puoi effettuare una ricerca in questi documenti. Immetti le parole chiave 
+    della tua ricerca nel riquadro sottostante "cerca". Nota che la funzione
+    di ricerca cerca automaticamente per tutte le parole. Le pagine
+    che contendono meno parole non compariranno nei risultati di ricerca.
+  </p>
 
-<h1 id="index">Index</h1>
+  <form class="form-search" action="" method="get">
+    <input type="text" name="q" class="input-medium search-query">
+    <button type="submit" class="btn">cerca</button>
+    <span id="search-progress" style="padding-left: 10px"></span>
+  </form>
 
-<div class="genindex-jumpbox">
- 
-</div>
-
+  
+  <div id="search-results">
+  
+  </div>
 
     </div>
       
