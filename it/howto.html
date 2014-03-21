@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Client MetaSearch per i servizi di catalogazione &mdash; MetaSearch 0.1-dev documentazione</title>
+    <title>Client MetaSearch per i servizi di catalogazione &mdash; MetaSearch 0.2.0 documentazione</title>
     
     <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1-dev',
+        VERSION:     '0.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -30,7 +30,7 @@
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="MetaSearch 0.1-dev documentazione" href="index.html" />
+    <link rel="top" title="MetaSearch 0.2.0 documentazione" href="index.html" />
     <link rel="next" title="License" href="license.html" />
     <link rel="prev" title="Client Catalogo MetaSearch" href="index.html" />
 <meta charset='utf-8'>
@@ -52,7 +52,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           MetaSearch</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1-dev</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.2.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -188,6 +188,7 @@
 <p>MetaSearch permette di caricare e salvare le connessioni usando un file XML. Questo è utile quando si devono condividere le informazioni tra più applicazioni. Segue un esempio del formato XML per questo tipo di impostazioni.</p>
 <div class="highlight-python"><div class="highlight"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;qgsCSWConnections version=&quot;1.0&quot;&gt;
+    &lt;csw name=&quot;Data.gov CSW&quot; url=&quot;http://catalog.data.gov/csw-all&quot;/&gt;
     &lt;csw name=&quot;Geonorge - National CSW service for Norway&quot; url=&quot;http://www.geonorge.no/geonetwork/srv/eng/csw&quot;/&gt;
     &lt;csw name=&quot;LINZ Data Service&quot; url=&quot;http://data.linz.govt.nz/feeds/csw&quot;/&gt;
     &lt;csw name=&quot;Nationaal Georegister (Nederland)&quot; url=&quot;http://www.nationaalgeoregister.nl/geonetwork/srv/eng/csw&quot;/&gt;
