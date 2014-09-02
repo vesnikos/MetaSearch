@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Client MetaSearch pour les Services de Catalogage &mdash; documentation MetaSearch 0.2.0</title>
+    <title>Client MetaSearch pour les Services de Catalogage &mdash; documentation MetaSearch 0.3.0</title>
     
     <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.2.0',
+        VERSION:     '0.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -30,7 +30,7 @@
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="documentation MetaSearch 0.2.0" href="index.html" />
+    <link rel="top" title="documentation MetaSearch 0.3.0" href="index.html" />
     <link rel="next" title="License" href="license.html" />
     <link rel="prev" title="Client MetaSearch pour les Services de Catalogage" href="index.html" />
 <meta charset='utf-8'>
@@ -52,7 +52,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           MetaSearch</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.3.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -190,8 +190,10 @@
 &lt;qgsCSWConnections version=&quot;1.0&quot;&gt;
     &lt;csw name=&quot;Data.gov CSW&quot; url=&quot;http://catalog.data.gov/csw-all&quot;/&gt;
     &lt;csw name=&quot;Geonorge - National CSW service for Norway&quot; url=&quot;http://www.geonorge.no/geonetwork/srv/eng/csw&quot;/&gt;
+    &lt;csw name=&quot;Geoportale Nazionale - Servizio di ricerca Italiano&quot; url=&quot;http://www.pcn.minambiente.it/geoportal/csw&quot;/&gt;
     &lt;csw name=&quot;LINZ Data Service&quot; url=&quot;http://data.linz.govt.nz/feeds/csw&quot;/&gt;
     &lt;csw name=&quot;Nationaal Georegister (Nederland)&quot; url=&quot;http://www.nationaalgeoregister.nl/geonetwork/srv/eng/csw&quot;/&gt;
+    &lt;csw name=&quot;RNDT - Repertorio Nazionale dei Dati Territoriali - Servizio di ricerca&quot; url=&quot;http://www.rndt.gov.it/RNDT/CSW&quot;/&gt;
     &lt;csw name=&quot;UK Location Catalogue Publishing Service&quot; url=&quot;http://csw.data.gov.uk/geonetwork/srv/en/csw&quot;/&gt;
     &lt;csw name=&quot;UNEP/GRID-Geneva Metadata Catalog&quot; url=&quot;http://metadata.grid.unep.ch:8080/geonetwork/srv/eng/csw&quot;/&gt;
 &lt;/qgsCSWConnections&gt;
@@ -231,8 +233,7 @@
 <h3>Paramètres<a class="headerlink" href="#settings" title="Lien permanent vers ce titre">¶</a></h3>
 <p>Les paramètres suivants permettent de régler MetaSearch de manière fine :</p>
 <ul class="simple">
-<li><p class="first"><strong>Nommage de la connexion</strong> : lors de l&#8217;ajout d&#8217;une nouvelle connexion à un service web OGC (WMS/WMTS|WFS|WCS), la connexion est stockée dans le &#8216;various QGIS layer provider&#8217;. Utiliser ce paramètre pour spécifier s&#8217;il faut utiliser le nom du XML des Capabilities du service, s&#8217;il faut l&#8217;écraser ou s&#8217;il faut utiliser un nom temporaire</p>
-</li>
+<li><strong>Results paging</strong>: when searching metadata catalogues, the number of results to show per page</li>
 </ul>
 </div>
 </div>

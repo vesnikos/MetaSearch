@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MetaSearch Katalog Client &mdash; MetaSearch 0.2.0 Dokumentation</title>
+    <title>MetaSearch Katalog Client &mdash; MetaSearch 0.3.0 Dokumentation</title>
     
     <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.2.0',
+        VERSION:     '0.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -30,7 +30,7 @@
     <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-3.0.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="MetaSearch 0.2.0 Dokumentation" href="index.html" />
+    <link rel="top" title="MetaSearch 0.3.0 Dokumentation" href="index.html" />
     <link rel="next" title="License" href="license.html" />
     <link rel="prev" title="MetaSearch Catalogue Client" href="index.html" />
 <meta charset='utf-8'>
@@ -52,7 +52,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           MetaSearch</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.3.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -182,25 +182,18 @@
 <a class="reference internal image-reference" href="../_images/metasearch-services.png"><img alt="Managing Catalogue Services" class="align-right" src="../_images/metasearch-services.png" style="width: 289.6px; height: 405.6px;" /></a>
 <p>Der &#8216;Services&#8217; TAB erlaubt die Verwaltung aller verfügbaren Katalogservices. MetaSearch stellt eine Standardliste von Katalogservices zur Verfügung die man über den &#8216;Füge Standard Services hinzu&#8217; Button erreicht.</p>
 <p>To all listed Catalogue Service entries, click the dropdown select box.</p>
-<p>To add a Catalogue Service entry, click the &#8216;New&#8217; button, and enter a Name for
-the service, as well as the URL/endpoint.  Note that only the base URL is
-required (not a full GetCapabilities URL).  Clicking ok will add the service
-to the list of entries.</p>
-<p>To edit an existing Catalogue Service entry, select the entry you would like
-to edit and click the &#8216;Edit&#8217; button, and modify the Name or URL values, then
-click ok.</p>
-<p>To delete a Catalogue Service entry, select the entry you would like to
-delete and click the &#8216;Delete&#8217; button.  You will be asked to confirm deleting
-the entry.</p>
-<p>MetaSearch allows for loading and saving connections to an XML file.  This is
-useful when you need to share settings between applications.  Below is an
-example of the XML file format.</p>
+<p>Um einen Katalog Service hinzuzufügen klicken sie auf &#8216;Neu&#8217; und geben sie einen Namen und die Adresse des Service ein. Beachten Sie das nur die BasisURL notwendig ist (nicht die Vollständige GetCapabilities URL). Ein Klick auf OK fügt den Service hinzu.</p>
+<p>Um einen existierenden Katalogservice zu editieren wählen sie den betreffenden Eintrag aus und klicken die &#8216;Edit&#8217; Schaltfläche. Ändern Sie Namen und/oder URL und klicken auf OK.</p>
+<p>Um einen Katalogservice zu löschen wählen Sie den Eintrag den Sie löschen wollen und klicken auf &#8216;Löschen&#8217;. Eine Sicherheitsabfrage die Sie bestätigen müssen wird erscheinen.</p>
+<p>MetaSearch erlaubt Verbindungen in XML Dateien zu speichern. Dies ist nützlich um Einstellungen mit anderen Programmen zu teilen. Unterhalb findet sich ein Beispiel des XML Dateiformats.</p>
 <div class="highlight-python"><div class="highlight"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;qgsCSWConnections version=&quot;1.0&quot;&gt;
     &lt;csw name=&quot;Data.gov CSW&quot; url=&quot;http://catalog.data.gov/csw-all&quot;/&gt;
     &lt;csw name=&quot;Geonorge - National CSW service for Norway&quot; url=&quot;http://www.geonorge.no/geonetwork/srv/eng/csw&quot;/&gt;
+    &lt;csw name=&quot;Geoportale Nazionale - Servizio di ricerca Italiano&quot; url=&quot;http://www.pcn.minambiente.it/geoportal/csw&quot;/&gt;
     &lt;csw name=&quot;LINZ Data Service&quot; url=&quot;http://data.linz.govt.nz/feeds/csw&quot;/&gt;
     &lt;csw name=&quot;Nationaal Georegister (Nederland)&quot; url=&quot;http://www.nationaalgeoregister.nl/geonetwork/srv/eng/csw&quot;/&gt;
+    &lt;csw name=&quot;RNDT - Repertorio Nazionale dei Dati Territoriali - Servizio di ricerca&quot; url=&quot;http://www.rndt.gov.it/RNDT/CSW&quot;/&gt;
     &lt;csw name=&quot;UK Location Catalogue Publishing Service&quot; url=&quot;http://csw.data.gov.uk/geonetwork/srv/en/csw&quot;/&gt;
     &lt;csw name=&quot;UNEP/GRID-Geneva Metadata Catalog&quot; url=&quot;http://metadata.grid.unep.ch:8080/geonetwork/srv/eng/csw&quot;/&gt;
 &lt;/qgsCSWConnections&gt;
@@ -255,10 +248,7 @@ appropriate WMS/WMTS|WFS|WCS connection dialogue will then appear</li>
 <h3>Settings<a class="headerlink" href="#settings" title="Permalink zu dieser Überschrift">¶</a></h3>
 <p>You can fine tune MetaSearch with the following settings:</p>
 <ul class="simple">
-<li><strong>Connection naming</strong>: when adding an OWS connection (WMS/WMTS|WFS|WCS), the
-connection is stored with the various QGIS layer provider. Use this setting
-to set whether to use the name from the service Capabilities XML, whether to
-overwrite or to use a temporary name</li>
+<li><strong>Results paging</strong>: when searching metadata catalogues, the number of results to show per page</li>
 </ul>
 </div>
 </div>
