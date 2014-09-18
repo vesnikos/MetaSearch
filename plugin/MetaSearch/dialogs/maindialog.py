@@ -58,6 +58,9 @@ from MetaSearch.util import (get_connections_from_file, get_ui_class,
                              highlight_xml, normalize_text, open_url,
                              render_template, StaticContext)
 
+from geopy.geocoders import Nominatim,GoogleV3
+
+
 BASE_CLASS = get_ui_class('maindialog.ui')
 
 
@@ -83,7 +86,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # form inputs
         self.startfrom = 0
         self.maxrecords = 10
-        self.timeout = 10
         self.constraints = []
 
         # Servers tab
@@ -113,6 +115,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnCanvasBbox.setAutoDefault(False)
         self.btnCanvasBbox.clicked.connect(self.set_bbox_from_map)
         self.btnGlobalBbox.clicked.connect(self.set_bbox_global)
+        #Reverse Geocode BBox
+        self.btnRGeocodeBbox.clicked.connect(self.set_bbox_from_r_geocode)
 
         # navigation buttons
         self.btnFirst.clicked.connect(self.navigate)
@@ -290,7 +294,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         key = '/MetaSearch/%s' % current_text
 
-        msg = self.tr('Remove service %s?') % current_text
+        msg = self.tr('Remove service %s?' % current_text)
 
         result = QMessageBox.information(self, self.tr('Confirm delete'), msg,
                                          QMessageBox.Ok | QMessageBox.Cancel)
@@ -324,7 +328,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             name = server.attrib.get('name')
             # check for duplicates
             if name in keys:
-                msg = self.tr('%s exists.  Overwrite?') % name
+                msg = self.tr('%s exists.  Overwrite?' % name)
                 res = QMessageBox.warning(self,
                                           self.tr('Loading connections'), msg,
                                           QMessageBox.Yes | QMessageBox.No)
@@ -392,6 +396,59 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWest.setText('-180')
         self.leEast.setText('180')
 
+    def set_bbox_from_r_geocode(self):
+        """set bounging box from reverse geolocation"""
+
+        # TODO: Check if internets are up and or catch exceptions
+
+        # geolocator = Nominatim(
+        #     #view_box=(19.58,34.88,28.3,41.75),
+        #     country_bias="grc",
+        #     timeout=5
+        #     ,format_string=u"Δήμος %s"
+        #     )
+        geolocator = GoogleV3(timeout=4,domain="maps.google.gr")
+
+        location = geolocator.geocode(self.leWhere.text())
+        x,y = location.latitude, location.longitude
+
+        self.leWhere.setText(location.address)
+
+        # hackish way parsing results 
+        maxy = float(location._raw[u"geometry"][u"bounds"][u"northeast"][u"lat"])
+        maxx = float(location._raw[u"geometry"][u"bounds"][u"northeast"][u"lng"])
+        miny = float(location._raw[u"geometry"][u"bounds"][u"southwest"][u"lat"])
+        minx = float(location._raw[u"geometry"][u"bounds"][u"southwest"][u"lng"])
+
+        bbox = [minx, miny, maxx, maxy]
+        # set radius of BBox
+        
+        
+        self.leNorth.setText(str(maxy)[:])
+        self.leSouth.setText(str(miny)[:])
+        self.leWest.setText(str(minx)[:])
+        self.leEast.setText(str(maxx)[:])
+
+        # if the record has a bbox, show a footprint on the map
+
+        # points = bbox_to_polygon2(bbox)
+        # if points is not None:
+        #     src = QgsCoordinateReferenceSystem(4326)
+        #     dst = self.map.mapRenderer().destinationCrs()
+        #     geom = QgsGeometry.fromPolygon(points)
+        #     if src.postgisSrid() != dst.postgisSrid():
+        #         ctr = QgsCoordinateTransform(src, dst)
+        #         try:
+        #             geom.transform(ctr)
+        #         except Exception, err:
+        #             QMessageBox.warning(
+        #                 self,
+        #                 self.tr('Coordinate Transformation Error'),
+        #                 str(err))
+        #             self.rubber_band.setColor(QColor(100, 0, 255, 75))
+        #             self.rubber_band.setToGeometry(geom, None)
+
+
     def search(self):
         """execute search"""
 
@@ -416,9 +473,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # start position and number of records to return
         self.startfrom = 0
         self.maxrecords = self.spnRecords.value()
-
-        # set timeout
-        self.timeout = self.spnTimeout.value()
 
         # bbox
         minx = self.leWest.text()
@@ -454,12 +508,12 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         except ExceptionReport, err:
             QApplication.restoreOverrideCursor()
             QMessageBox.warning(self, self.tr('Search error'),
-                                self.tr('Search error: %s') % err)
+                                self.tr('Search error: %s' % err))
             return
         except Exception, err:
             QApplication.restoreOverrideCursor()
             QMessageBox.warning(self, self.tr('Connection error'),
-                                self.tr('Connection error: %s') % err)
+                                self.tr('Connection error: %s' % err))
             return
 
         if self.catalog.results['matches'] == 0:
@@ -477,10 +531,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         position = self.catalog.results['returned'] + self.startfrom
 
-        msg = self.tr('Showing %d - %d of %d result%s') % \
-                     (self.startfrom + 1, position,
-                      self.catalog.results['matches'],
-                      's'[self.catalog.results['matches'] == 1:])
+        msg = self.tr('Showing %d - %d of %d result%s' %
+                      (self.startfrom + 1, position,
+                       self.catalog.results['matches'],
+                       's'[self.catalog.results['matches'] == 1:]))
 
         self.lblResults.setText(msg)
 
@@ -665,7 +719,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # check for duplicates
         if sname in keys:
-            msg = self.tr('Connection %s exists. Overwrite?') % sname
+            msg = self.tr('Connection %s exists. Overwrite?' % sname)
             res = QMessageBox.warning(self, self.tr('Saving server'), msg,
                                       QMessageBox.Yes | QMessageBox.No)
             if res != QMessageBox.Yes:
@@ -731,13 +785,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         try:
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-            cat = CatalogueServiceWeb(self.catalog_url, timeout=self.timeout)
+            cat = CatalogueServiceWeb(self.catalog_url)
             cat.getrecordbyid(
                 [self.catalog.records[identifier].identifier])
         except ExceptionReport, err:
             QApplication.restoreOverrideCursor()
             QMessageBox.warning(self, self.tr('GetRecords error'),
-                                self.tr('Error getting response: %s') % err)
+                                self.tr('Error getting response: %s' % err))
             return
 
         QApplication.restoreOverrideCursor()
@@ -803,15 +857,14 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # connect to the server
         try:
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-            self.catalog = CatalogueServiceWeb(self.catalog_url,
-                                               timeout=self.timeout)
+            self.catalog = CatalogueServiceWeb(self.catalog_url)
             return True
         except ExceptionReport, err:
-            msg = self.tr('Error connecting to service: %s') % err
+            msg = self.tr('Error connecting to service: %s' % err)
         except ValueError, err:
-            msg = self.tr('Value Error: %s') % err
+            msg = self.tr('Value Error: %s' % err)
         except Exception, err:
-            msg = self.tr('Unknown Error: %s') % err
+            msg = self.tr('Unknown Error: %s' % err)
 
         QMessageBox.warning(self, self.tr('CSW Connection error'), msg)
         QApplication.restoreOverrideCursor()
@@ -874,6 +927,21 @@ def _get_field_value(field):
         value = 1
 
     return value
+
+def bbox_to_polygon2(bbox):
+    """converts minx, miny, maxx, maxy to list of Qgs Points Objects"""
+    points = bbox
+
+    if len(bbox) < 5:
+
+        return [[
+            QgsPoint(points[0], points[1]),
+            QgsPoint(points[0], points[3]),
+            QgsPoint(points[2], points[3]),
+            QgsPoint(points[2], points[1])
+        ]]
+    else:
+        return None
 
 
 def bbox_to_polygon(bbox):
