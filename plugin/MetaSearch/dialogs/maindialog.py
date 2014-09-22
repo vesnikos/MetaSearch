@@ -97,7 +97,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.startfrom = 0
         self.maxrecords = 10
         self.constraints = []
-        #self.ListLayerName = [l.name() for l in self.map.layers()]
 
         # Servers tab
         self.cmbConnectionsServices.activated.connect(self.save_connection)
@@ -147,12 +146,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         #self.map.layersChanged.connect(self.populate_layer_list)
 
         self.manageGui()
-
-
-        #TO BE REMOVED, scratch pad
-
-    def test_func(self):
-        pass
 
     def manageGui(self):
         """open window"""
@@ -321,7 +314,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         key = '/MetaSearch/%s' % current_text
 
-        msg = self.tr('Remove service %s?' % current_text)
+        msg = self.tr('Remove service %s?') % current_text
 
         result = QMessageBox.information(self, self.tr('Confirm delete'), msg,
                                          QMessageBox.Ok | QMessageBox.Cancel)
@@ -355,7 +348,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             name = server.attrib.get('name')
             # check for duplicates
             if name in keys:
-                msg = self.tr('%s exists.  Overwrite?' % name)
+                msg = self.tr('%s exists.  Overwrite?') % name
                 res = QMessageBox.warning(self,
                                           self.tr('Loading connections'), msg,
                                           QMessageBox.Yes | QMessageBox.No)
@@ -559,6 +552,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.startfrom = 0
         self.maxrecords = self.spnRecords.value()
 
+        # set timeout
+        self.timeout = self.spnTimeout.value()
+
         # bbox
         minx = self.leWest.text()
         miny = self.leSouth.text()
@@ -593,12 +589,12 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         except ExceptionReport, err:
             QApplication.restoreOverrideCursor()
             QMessageBox.warning(self, self.tr('Search error'),
-                                self.tr('Search error: %s' % err))
+                                self.tr('Search error: %s') % err)
             return
         except Exception, err:
             QApplication.restoreOverrideCursor()
             QMessageBox.warning(self, self.tr('Connection error'),
-                                self.tr('Connection error: %s' % err))
+                                self.tr('Connection error: %s') % err)
             return
 
         if self.catalog.results['matches'] == 0:
@@ -616,10 +612,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         position = self.catalog.results['returned'] + self.startfrom
 
-        msg = self.tr('Showing %d - %d of %d result%s' %
+        msg = self.tr('Showing %d - %d of %d result%s') % \
                       (self.startfrom + 1, position,
                        self.catalog.results['matches'],
-                       's'[self.catalog.results['matches'] == 1:]))
+                      's'[self.catalog.results['matches'] == 1:])
 
         self.lblResults.setText(msg)
 
@@ -804,7 +800,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # check for duplicates
         if sname in keys:
-            msg = self.tr('Connection %s exists. Overwrite?' % sname)
+            msg = self.tr('Connection %s exists. Overwrite?') % sname
             res = QMessageBox.warning(self, self.tr('Saving server'), msg,
                                       QMessageBox.Yes | QMessageBox.No)
             if res != QMessageBox.Yes:
@@ -870,13 +866,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         try:
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-            cat = CatalogueServiceWeb(self.catalog_url)
+            cat = CatalogueServiceWeb(self.catalog_url, timeout=self.timeout)
             cat.getrecordbyid(
                 [self.catalog.records[identifier].identifier])
         except ExceptionReport, err:
             QApplication.restoreOverrideCursor()
             QMessageBox.warning(self, self.tr('GetRecords error'),
-                                self.tr('Error getting response: %s' % err))
+                                self.tr('Error getting response: %s') % err)
             return
 
         QApplication.restoreOverrideCursor()
@@ -942,14 +938,15 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # connect to the server
         try:
             QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-            self.catalog = CatalogueServiceWeb(self.catalog_url)
+            self.catalog = CatalogueServiceWeb(self.catalog_url,
+                                               timeout=self.timeout)
             return True
         except ExceptionReport, err:
-            msg = self.tr('Error connecting to service: %s' % err)
+            msg = self.tr('Error connecting to service: %s') % err
         except ValueError, err:
-            msg = self.tr('Value Error: %s' % err)
+            msg = self.tr('Value Error: %s') % err
         except Exception, err:
-            msg = self.tr('Unknown Error: %s' % err)
+            msg = self.tr('Unknown Error: %s') % err
 
         QMessageBox.warning(self, self.tr('CSW Connection error'), msg)
         QApplication.restoreOverrideCursor()
@@ -1027,22 +1024,6 @@ def bbox_to_polygon2(bbox):
         ]]
     else:
         return None
-
-def geolocator_to_bbox(geolocator_type, resp):
-    """Parses the geolocation service's respond as ullr"""
-
-    if geolocator_type == "googlev3":
-        maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
-        maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
-        miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
-        minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
-    elif geolocator_type == "nominatim":
-        maxx = float(resp[u'boundingbox'][3])
-        maxy = float(resp[u'boundingbox'][1])
-        minx = float(resp[u'boundingbox'][2])
-        miny = float(resp[u'boundingbox'][0])
-
-    return maxx,maxy,minx,miny
 
 def bbox_to_polygon(bbox):
     """converts OWSLib bbox object to list of QgsPoint objects"""

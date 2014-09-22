@@ -47,7 +47,6 @@ class MetaSearchPlugin(object):
         self.dialog = None
         self.web_menu = '&MetaSearch'
 
-
         LOGGER.debug('Setting up i18n')
 
         # TODO: does this work for locales like: pt_BR ?
