@@ -29,7 +29,7 @@
 
 from PyQt4.QtGui import QDialog
 
-from MetaSearch.util import get_ui_class
+from MetaSearch2.util import get_ui_class
 
 BASE_CLASS = get_ui_class('recorddialog.ui')
 

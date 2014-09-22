@@ -29,8 +29,8 @@ import os
 from PyQt4.QtCore import QCoreApplication, QLocale, QSettings, QTranslator
 from PyQt4.QtGui import QAction, QIcon
 
-from MetaSearch.dialogs.maindialog import MetaSearchDialog
-from MetaSearch.util import StaticContext, open_url
+from MetaSearch2.dialogs.maindialog import MetaSearchDialog
+from MetaSearch2.util import StaticContext, open_url
 
 LOGGER = logging.getLogger('MetaSearch')
 
@@ -46,6 +46,7 @@ class MetaSearchPlugin(object):
         self.action_help = None
         self.dialog = None
         self.web_menu = '&MetaSearch'
+
 
         LOGGER.debug('Setting up i18n')
 
@@ -115,7 +116,7 @@ class MetaSearchPlugin(object):
     def run(self):
         """open MetaSearch"""
 
-        self.dialog.exec_()
+        self.dialog.show()
 
     def help(self):
         """open help in user's default web browser"""

@@ -38,7 +38,7 @@ from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
 
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
-                       QgsProviderRegistry)
+                       QgsProviderRegistry )
 from qgis.gui import QgsRubberBand
 
 from owslib.csw import CatalogueServiceWeb
@@ -58,7 +58,9 @@ from MetaSearch.util import (get_connections_from_file, get_ui_class,
                              highlight_xml, normalize_text, open_url,
                              render_template, StaticContext)
 
+
 from geopy.geocoders import Nominatim,GoogleV3
+from geopy.exc import GeopyError
 
 
 BASE_CLASS = get_ui_class('maindialog.ui')
@@ -79,14 +81,23 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.catalog_url = None
         self.context = StaticContext()
 
+        # CSW Footprint
         self.rubber_band = QgsRubberBand(self.map, True)  # True = a polygon
         self.rubber_band.setColor(QColor(255, 0, 0, 75))
         self.rubber_band.setWidth(5)
+        # Misc Footprint
+        self.misc_rubber_band = QgsRubberBand(self.map, True)
+        self.misc_rubber_band.setColor(QColor(0, 0, 255, 75)) #Blue
+        self.misc_rubber_band.setWidth(5)
+
+
+        self.LayerDic = {}
 
         # form inputs
         self.startfrom = 0
         self.maxrecords = 10
         self.constraints = []
+        #self.ListLayerName = [l.name() for l in self.map.layers()]
 
         # Servers tab
         self.cmbConnectionsServices.activated.connect(self.save_connection)
@@ -117,6 +128,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnGlobalBbox.clicked.connect(self.set_bbox_global)
         #Reverse Geocode BBox
         self.btnRGeocodeBbox.clicked.connect(self.set_bbox_from_r_geocode)
+        #Layer List
+        self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
+        self.leNorth.textChanged.connect(self.draw_search_footprint)
 
         # navigation buttons
         self.btnFirst.clicked.connect(self.navigate)
@@ -129,7 +143,16 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnAddToWcs.clicked.connect(self.add_to_ows)
         self.btnShowXml.clicked.connect(self.show_xml)
 
+        #Misc
+        #self.map.layersChanged.connect(self.populate_layer_list)
+
         self.manageGui()
+
+
+        #TO BE REMOVED, scratch pad
+
+    def test_func(self):
+        pass
 
     def manageGui(self):
         """open window"""
@@ -149,6 +172,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # install proxy handler if specified in QGIS settings
         self.install_proxy()
+
+    def showEvent(self, QShowEvent):
+        self.populate_layer_list()
+        #pass
 
     # Servers tab
 
@@ -360,6 +387,54 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     # Search tab
 
+    def draw_search_footprint(self):
+        """Draw BBox visualising the Search extension"""
+
+        # if the record has a bbox, show a footprint on the map
+
+        points = [[QgsPoint(float(self.leNorth.text()),float(self.leWest.text())), #ul
+                  QgsPoint(float(self.leNorth.text()),float(self.leEast.text())), #ur
+                  QgsPoint(float(self.leSouth.text()),float(self.leEast.text())), #lr
+                  QgsPoint(float(self.leSouth.text()),float(self.leWest.text()))]] #ll
+
+        src = QgsCoordinateReferenceSystem(4326)
+        dst = self.map.mapRenderer().destinationCrs() #deprecatated?
+        geom = QgsGeometry.fromPolygon(points)
+        if src.authid() != dst.authid():
+            ctr = QgsCoordinateTransform(src, dst)
+            try:
+                geom.transform(ctr)
+            except Exception, err:
+                QMessageBox.warning(
+                    self,
+                    self.tr('Coordinate Transformation Error'),
+                    str(err))
+        self.misc_rubber_band.setToGeometry(geom, None)
+
+    def populate_layer_list(self):
+        """populate layer list with active layers """
+
+        # Triggered by overloaded showEvent and MapCanvas.layersChanged
+        self.cmbLayerList.clear()
+        self.LayerDic = {}
+
+        for l in self.map.layers():
+            self.LayerDic[l.id()] = l.name(), \
+                [l.extent().xMinimum(),
+                l.extent().yMaximum(),
+                l.extent().xMaximum(),
+                l.extent().yMinimum()], \
+                int(l.crs().authid().split(":")[1])
+
+        self.cmbLayerList.setEnabled(True)
+        if len(self.LayerDic) < 1:
+            self.cmbLayerList.addItem("No Active Layers Detected")
+            self.cmbLayerList.setEnabled(False)
+            return
+
+        for key in self.LayerDic:
+            self.cmbLayerList.addItem(self.LayerDic[key][0], key)
+
     def set_bbox_from_map(self):
         """set bounding box from map extent"""
 
@@ -389,6 +464,37 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWest.setText(str(minx)[0:9])
         self.leEast.setText(str(maxx)[0:9])
 
+    def set_bbox_from_layer(self):
+        """ set bounding box from layer"""
+
+
+        idx = self.cmbLayerList.currentIndex()
+        crsid = self.LayerDic[self.cmbLayerList.itemData(idx)][2]
+        bbox = self.LayerDic[self.cmbLayerList.itemData(idx)][1]
+
+        if crsid != 4326:  # reproject to EPSG:4326
+            src = QgsCoordinateReferenceSystem(crsid)
+            dest = QgsCoordinateReferenceSystem(4326)
+            xform = QgsCoordinateTransform(src, dest)
+            minxy = xform.transform(QgsPoint(bbox[2],
+                                             bbox[3]))
+            maxxy = xform.transform(QgsPoint(bbox[0],
+                                              bbox[1]))
+            minx, miny = minxy
+            maxx, maxy = maxxy
+
+        else: #4326
+
+            minx = bbox[0]
+            maxy = bbox[1]
+            maxx = bbox[2]
+            miny = bbox[3]
+
+        self.leNorth.setText(str(maxy)[0:9])
+        self.leSouth.setText(str(miny)[0:9])
+        self.leWest.setText(str(minx)[0:9])
+        self.leEast.setText(str(maxx)[0:9])
+
     def set_bbox_global(self):
         """set global bounding box"""
         self.leNorth.setText('90')
@@ -397,57 +503,36 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leEast.setText('180')
 
     def set_bbox_from_r_geocode(self):
-        """set bounging box from reverse geolocation"""
+        """set bounding box from reverse geolocation"""
 
-        # TODO: Check if internets are up and or catch exceptions
+        #TODO: Check if internets are up and or catch exceptions
+        if self.rbGeolocationService_Google.isChecked():
+            # List of google domains:
+            # http://en.wikipedia.org/wiki/List_of_Google_domains
+            geolocator = GoogleV3(timeout=4,domain="maps.google.gr")
+            geotype = "googlev3"
+        elif self.rbGeolocationService_OSM.isChecked():
+            geolocator = Nominatim(view_box=(19.58,34.88,28.3,41.75),timeout=4)
+            geotype = "nominatim"
+        try:
+            location = geolocator.geocode(self.leWhere.text())
+            #x,y = location.latitude, location.longitude
+            ullr = geolocator_to_bbox(geolocator_type=geotype,resp=location._raw)
 
-        # geolocator = Nominatim(
-        #     #view_box=(19.58,34.88,28.3,41.75),
-        #     country_bias="grc",
-        #     timeout=5
-        #     ,format_string=u"Δήμος %s"
-        #     )
-        geolocator = GoogleV3(timeout=4,domain="maps.google.gr")
+            self.leWhere.setText(location.address)
+            # hackish way parsing results
+            maxx, maxy, minx, miny = ullr
 
-        location = geolocator.geocode(self.leWhere.text())
-        x,y = location.latitude, location.longitude
+            bbox = [minx, miny, maxx, maxy]
 
-        self.leWhere.setText(location.address)
-
-        # hackish way parsing results 
-        maxy = float(location._raw[u"geometry"][u"bounds"][u"northeast"][u"lat"])
-        maxx = float(location._raw[u"geometry"][u"bounds"][u"northeast"][u"lng"])
-        miny = float(location._raw[u"geometry"][u"bounds"][u"southwest"][u"lat"])
-        minx = float(location._raw[u"geometry"][u"bounds"][u"southwest"][u"lng"])
-
-        bbox = [minx, miny, maxx, maxy]
-        # set radius of BBox
-        
-        
-        self.leNorth.setText(str(maxy)[:])
-        self.leSouth.setText(str(miny)[:])
-        self.leWest.setText(str(minx)[:])
-        self.leEast.setText(str(maxx)[:])
-
-        # if the record has a bbox, show a footprint on the map
-
-        # points = bbox_to_polygon2(bbox)
-        # if points is not None:
-        #     src = QgsCoordinateReferenceSystem(4326)
-        #     dst = self.map.mapRenderer().destinationCrs()
-        #     geom = QgsGeometry.fromPolygon(points)
-        #     if src.postgisSrid() != dst.postgisSrid():
-        #         ctr = QgsCoordinateTransform(src, dst)
-        #         try:
-        #             geom.transform(ctr)
-        #         except Exception, err:
-        #             QMessageBox.warning(
-        #                 self,
-        #                 self.tr('Coordinate Transformation Error'),
-        #                 str(err))
-        #             self.rubber_band.setColor(QColor(100, 0, 255, 75))
-        #             self.rubber_band.setToGeometry(geom, None)
-
+            # set radius of BBox
+            self.leNorth.setText(str(maxy)[:])
+            self.leSouth.setText(str(miny)[:])
+            self.leWest.setText(str(minx)[:])
+            self.leEast.setText(str(maxx)[:])
+        except (GeopyError, AttributeError, KeyError):
+            self.leWhere.setText(u"Err: Using Global Coverage")
+            self.set_bbox_global()
 
     def search(self):
         """execute search"""
@@ -943,6 +1028,21 @@ def bbox_to_polygon2(bbox):
     else:
         return None
 
+def geolocator_to_bbox(geolocator_type, resp):
+    """Parses the geolocation service's respond as ullr"""
+
+    if geolocator_type == "googlev3":
+        maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
+        maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
+        miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
+        minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
+    elif geolocator_type == "nominatim":
+        maxx = float(resp[u'boundingbox'][3])
+        maxy = float(resp[u'boundingbox'][1])
+        minx = float(resp[u'boundingbox'][2])
+        miny = float(resp[u'boundingbox'][0])
+
+    return maxx,maxy,minx,miny
 
 def bbox_to_polygon(bbox):
     """converts OWSLib bbox object to list of QgsPoint objects"""

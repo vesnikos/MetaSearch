@@ -33,7 +33,7 @@ from PyQt4.QtCore import QSettings
 from PyQt4.QtGui import (QDialog, QDialogButtonBox, QFileDialog,
                          QListWidgetItem, QMessageBox)
 
-from MetaSearch.util import (get_connections_from_file, get_ui_class,
+from MetaSearch2.util import (get_connections_from_file, get_ui_class,
                              prettify_xml)
 
 BASE_CLASS = get_ui_class('manageconnectionsdialog.ui')
