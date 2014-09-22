@@ -129,7 +129,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnRGeocodeBbox.clicked.connect(self.set_bbox_from_r_geocode)
         #Layer List
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
-        #self.leNorth.textChanged.connect(self.draw_search_footprint)
 
         # navigation buttons
         self.btnFirst.clicked.connect(self.navigate)
@@ -382,6 +381,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     def draw_search_footprint(self):
         """Draw BBox visualising the Search extension"""
+        #TODO figure how to call; also i think there's a bug in the code
 
         # if the record has a bbox, show a footprint on the map
 
@@ -460,7 +460,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def set_bbox_from_layer(self):
         """ set bounding box from layer"""
 
-
         idx = self.cmbLayerList.currentIndex()
         crsid = self.LayerDic[self.cmbLayerList.itemData(idx)][2]
         bbox = self.LayerDic[self.cmbLayerList.itemData(idx)][1]
@@ -515,8 +514,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWhere.setText(location.address)
             # hackish way parsing results
             maxx, maxy, minx, miny = ullr
-
-            bbox = [minx, miny, maxx, maxy]
 
             # set radius of BBox
             self.leNorth.setText(str(maxy)[:])
@@ -1010,20 +1007,21 @@ def _get_field_value(field):
 
     return value
 
-def bbox_to_polygon2(bbox):
-    """converts minx, miny, maxx, maxy to list of Qgs Points Objects"""
-    points = bbox
+def geolocator_to_bbox(geolocator_type, resp):
+    """Parses the geolocation service's respond as ullr"""
 
-    if len(bbox) < 5:
+    if geolocator_type == "googlev3":
+        maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
+        maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
+        miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
+        minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
+    elif geolocator_type == "nominatim":
+        maxx = float(resp[u'boundingbox'][3])
+        maxy = float(resp[u'boundingbox'][1])
+        minx = float(resp[u'boundingbox'][2])
+        miny = float(resp[u'boundingbox'][0])
 
-        return [[
-            QgsPoint(points[0], points[1]),
-            QgsPoint(points[0], points[3]),
-            QgsPoint(points[2], points[3]),
-            QgsPoint(points[2], points[1])
-        ]]
-    else:
-        return None
+    return maxx,maxy,minx,miny
 
 def bbox_to_polygon(bbox):
     """converts OWSLib bbox object to list of QgsPoint objects"""
