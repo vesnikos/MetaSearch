@@ -129,7 +129,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnRGeocodeBbox.clicked.connect(self.set_bbox_from_r_geocode)
         #Layer List
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
-        self.leNorth.textChanged.connect(self.draw_search_footprint)
+        #self.leNorth.textChanged.connect(self.draw_search_footprint)
 
         # navigation buttons
         self.btnFirst.clicked.connect(self.navigate)
@@ -143,7 +143,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnShowXml.clicked.connect(self.show_xml)
 
         #Misc
-        #self.map.layersChanged.connect(self.populate_layer_list)
+        self.map.layersChanged.connect(self.populate_layer_list)
 
         self.manageGui()
 
