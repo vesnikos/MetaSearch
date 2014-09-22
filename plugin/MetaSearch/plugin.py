@@ -29,8 +29,8 @@ import os
 from PyQt4.QtCore import QCoreApplication, QLocale, QSettings, QTranslator
 from PyQt4.QtGui import QAction, QIcon
 
-from MetaSearch2.dialogs.maindialog import MetaSearchDialog
-from MetaSearch2.util import StaticContext, open_url
+from MetaSearch.dialogs.maindialog import MetaSearchDialog
+from MetaSearch.util import StaticContext, open_url
 
 LOGGER = logging.getLogger('MetaSearch')
 
