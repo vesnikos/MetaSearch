@@ -80,17 +80,12 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.catalog = None
         self.catalog_url = None
         self.context = StaticContext()
+        self.LayerDic = {}
 
         # CSW Footprint
         self.rubber_band = QgsRubberBand(self.map, True)  # True = a polygon
         self.rubber_band.setColor(QColor(255, 0, 0, 75))
         self.rubber_band.setWidth(5)
-        # Misc Footprint
-        self.misc_rubber_band = QgsRubberBand(self.map, True)
-        self.misc_rubber_band.setColor(QColor(0, 0, 255, 75)) #Blue
-        self.misc_rubber_band.setWidth(5)
-
-        self.LayerDic = {}
 
         # form inputs
         self.startfrom = 0
