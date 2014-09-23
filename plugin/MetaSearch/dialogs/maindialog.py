@@ -60,10 +60,12 @@ from MetaSearch.util import (get_connections_from_file, get_ui_class,
 
 
 from geopy.geocoders import Nominatim, GoogleV3
-from geopy.exc import (GeopyError, GeocoderQuotaExceeded, GeocoderUnavailable, GeocoderTimedOut)
+from geopy.exc import (GeopyError, GeocoderQuotaExceeded,
+                       GeocoderUnavailable, GeocoderTimedOut)
 
 
 BASE_CLASS = get_ui_class('maindialog.ui')
+
 
 class MetaSearchDialog(QDialog, BASE_CLASS):
     """main dialogue"""
@@ -411,9 +413,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         for l in self.map.layers():
             self.LayerDic[l.id()] = l.name(), \
                 [l.extent().xMinimum(),
-                l.extent().yMaximum(),
-                l.extent().xMaximum(),
-                l.extent().yMinimum()], \
+                 l.extent().yMaximum(),
+                 l.extent().xMaximum(),
+                 l.extent().yMinimum()], \
                 int(l.crs().authid().split(":")[1])
 
         self.cmbLayerList.setEnabled(True)
@@ -468,11 +470,11 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             minxy = xform.transform(QgsPoint(bbox[2],
                                              bbox[3]))
             maxxy = xform.transform(QgsPoint(bbox[0],
-                                              bbox[1]))
+                                             bbox[1]))
             minx, miny = minxy
             maxx, maxy = maxxy
 
-        else: #4326
+        else:  # 4326
 
             minx = bbox[0]
             maxy = bbox[1]
@@ -494,8 +496,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def set_bbox_from_r_geocode(self):
         """set bounding box from reverse geolocation"""
 
-
-        # TODO: Check if internets are up and or catch exceptions
         if self.rbGeolocationService_Google.isChecked():
             # List of google domains:
             # http://en.wikipedia.org/wiki/List_of_Google_domains
