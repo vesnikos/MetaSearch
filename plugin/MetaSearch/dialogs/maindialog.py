@@ -38,7 +38,7 @@ from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
 
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
-                       QgsProviderRegistry )
+                       QgsProviderRegistry)
 from qgis.gui import QgsRubberBand
 
 from owslib.csw import CatalogueServiceWeb
@@ -64,7 +64,6 @@ from geopy.exc import (GeopyError, GeocoderQuotaExceeded, GeocoderUnavailable, G
 
 
 BASE_CLASS = get_ui_class('maindialog.ui')
-
 
 class MetaSearchDialog(QDialog, BASE_CLASS):
     """main dialogue"""
@@ -112,6 +111,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.treeRecords.itemSelectionChanged.connect(self.record_clicked)
         self.treeRecords.itemDoubleClicked.connect(self.show_metadata)
         self.btnSearch.clicked.connect(self.search)
+        self.btnSearch.setAutoDefault(False)
         self.leKeywords.returnPressed.connect(self.search)
         # prevent dialog from closing upon pressing enter
         self.buttonBox.button(QDialogButtonBox.Close).setAutoDefault(False)
@@ -120,8 +120,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnCanvasBbox.setAutoDefault(False)
         self.btnCanvasBbox.clicked.connect(self.set_bbox_from_map)
         self.btnGlobalBbox.clicked.connect(self.set_bbox_global)
-        #Reverse Geocode BBox
-        self.btnRGeocodeBbox.clicked.connect(self.set_bbox_from_r_geocode)
+        self.btnGlobalBbox.setAutoDefault(False)
+        #Reverse Geocode
+        self.leWhere.returnPressed.connect(self.set_bbox_from_r_geocode)
         #Layer List
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
 
@@ -491,29 +492,33 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def set_bbox_from_r_geocode(self):
         """set bounding box from reverse geolocation"""
 
+
         #TODO: Check if internets are up and or catch exceptions
         if self.rbGeolocationService_Google.isChecked():
             # List of google domains:
             # http://en.wikipedia.org/wiki/List_of_Google_domains
             geolocator = GoogleV3(timeout=4, domain="maps.google.com")
             geotype = "googlev3"
+
         elif self.rbGeolocationService_OSM.isChecked():
             geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
             geotype = "nominatim"
+
         try:
             location = geolocator.geocode(self.leWhere.text())
+            #print location.raw
             #x,y = location.latitude, location.longitude
             ullr = geolocator_to_bbox(geolocator_type=geotype, resp=location.raw)
-
+            print ullr
             self.leWhere.setText(location.address)
             # hackish way parsing results
             maxx, maxy, minx, miny = ullr
 
             # set radius of BBox
-            self.leNorth.setText(str(maxy)[:])
-            self.leSouth.setText(str(miny)[:])
-            self.leWest.setText(str(minx)[:])
-            self.leEast.setText(str(maxx)[:])
+            self.leNorth.setText(str(maxy))
+            self.leSouth.setText(str(miny))
+            self.leWest.setText(str(minx))
+            self.leEast.setText(str(maxx))
         except (GeocoderTimedOut, GeocoderUnavailable):
             self.leWhere.setText(u"Err: GeoQuerry Quota Exceeded")
             self.set_bbox_global()
