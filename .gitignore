@@ -14,6 +14,5 @@ MetaSearch.pro
 plugin/MetaSearch/ext-libs
 # ui .py files built dynamically
 plugin/MetaSearch/ui/*.py
-.idea/
 
 docs/_build
