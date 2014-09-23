@@ -59,8 +59,8 @@ from MetaSearch.util import (get_connections_from_file, get_ui_class,
                              render_template, StaticContext)
 
 
-from geopy.geocoders import Nominatim,GoogleV3
-from geopy.exc import GeopyError
+from geopy.geocoders import Nominatim, GoogleV3
+from geopy.exc import (GeopyError, GeocoderQuotaExceeded, GeocoderUnavailable, GeocoderTimedOut)
 
 
 BASE_CLASS = get_ui_class('maindialog.ui')
@@ -519,6 +519,12 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leSouth.setText(str(miny)[:])
             self.leWest.setText(str(minx)[:])
             self.leEast.setText(str(maxx)[:])
+        except (GeocoderTimedOut, GeocoderUnavailable):
+            self.leWhere.setText(u"Err: GeoQuerry Quota Exceeded")
+            self.set_bbox_global()
+        except GeocoderQuotaExceeded:
+            self.leWhere.setText(u"Err: GeoQuerry Quota Exceeded")
+            self.set_bbox_global()
         except (GeopyError, AttributeError, KeyError):
             self.leWhere.setText(u"Err: Using Global Coverage")
             self.set_bbox_global()
