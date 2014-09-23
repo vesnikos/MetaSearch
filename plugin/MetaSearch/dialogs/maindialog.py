@@ -125,6 +125,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnGlobalBbox.setAutoDefault(False)
         # Reverse Geocode
         self.leWhere.returnPressed.connect(self.set_bbox_from_r_geocode)
+        self.leWhere.editingFinished.connect(self.togglegeolocprime)
         # Layer List
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
 
@@ -141,6 +142,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Misc
         self.map.layersChanged.connect(self.populate_layer_list)
+        self._geolocationPrime = False
 
         self.manageGui()
 
@@ -408,6 +410,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Triggered by overloaded showEvent and MapCanvas.layersChanged
         self.cmbLayerList.clear()
+        self.cmbLayerList.addItem("Filter by Layer Extent", None)
         self.LayerDic = {}
 
         for l in self.map.layers():
@@ -420,6 +423,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.cmbLayerList.setEnabled(True)
         if len(self.LayerDic) < 1:
+            self.cmbLayerList.clear()
             self.cmbLayerList.addItem("No Active Layers Detected")
             self.cmbLayerList.setEnabled(False)
             return
@@ -460,8 +464,11 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         """ set bounding box from layer"""
 
         idx = self.cmbLayerList.currentIndex()
-        crsid = self.LayerDic[self.cmbLayerList.itemData(idx)][2]
-        bbox = self.LayerDic[self.cmbLayerList.itemData(idx)][1]
+        try:
+            crsid = self.LayerDic[self.cmbLayerList.itemData(idx)][2]
+            bbox = self.LayerDic[self.cmbLayerList.itemData(idx)][1]
+        except KeyError:
+            return
 
         if crsid != 4326:  # reproject to EPSG:4326
             src = QgsCoordinateReferenceSystem(crsid)
@@ -535,6 +542,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.catalog = None
         self.constraints = []
+        if self._geolocationPrime:
+            self.set_bbox_from_r_geocode()
 
         # clear all fields and disable buttons
         self.lblResults.clear()
@@ -981,6 +990,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
             conn = '%s://%s%s%s' % (ptype, proxy_up, host, proxy_port)
             install_opener(build_opener(ProxyHandler({ptype: conn})))
+
+    def togglegeolocprime(self):
+        self._geolocationPrime = not self._geolocationPrime
 
 
 def save_connections():
