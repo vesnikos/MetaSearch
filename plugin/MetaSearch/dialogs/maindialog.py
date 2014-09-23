@@ -410,7 +410,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Triggered by overloaded showEvent and MapCanvas.layersChanged
         self.cmbLayerList.clear()
-        self.cmbLayerList.addItem("Filter by Layer Extent", None)
+        self.cmbLayerList.addItem(self.tr("Filter by Layer Extent", None))
         self.LayerDic = {}
 
         for l in self.map.layers():
@@ -424,7 +424,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.cmbLayerList.setEnabled(True)
         if len(self.LayerDic) < 1:
             self.cmbLayerList.clear()
-            self.cmbLayerList.addItem("No Active Layers Detected")
+            self.cmbLayerList.addItem(self.tr("No Active Layers Detected"))
             self.cmbLayerList.setEnabled(False)
             return
 
@@ -528,13 +528,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWest.setText(str(minx))
             self.leEast.setText(str(maxx))
         except (GeocoderTimedOut, GeocoderUnavailable):
-            self.leWhere.setText(u"Err: GeoQuerry Quota Exceeded")
+            self.leWhere.setText(self.tr(u"Err: GeoQuerry Quota Exceeded"))
             self.set_bbox_global()
         except GeocoderQuotaExceeded:
-            self.leWhere.setText(u"Err: GeoQuerry Quota Exceeded")
+            self.leWhere.setText(self.tr(u"Err: GeoQuerry Quota Exceeded"))
             self.set_bbox_global()
         except (GeopyError, AttributeError, KeyError):
-            self.leWhere.setText(u"Err: Using Global Coverage")
+            self.leWhere.setText(self.tr(u"Err: Using Global Coverage"))
             self.set_bbox_global()
 
     def search(self):
