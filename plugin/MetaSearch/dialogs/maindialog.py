@@ -113,7 +113,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnSearch.clicked.connect(self.search)
         self.btnSearch.setAutoDefault(False)
         self.leKeywords.returnPressed.connect(self.search)
-        # prevent dialog from closing upon pressing enter
+        # Prevent dialog from closing upon pressing enter
         self.buttonBox.button(QDialogButtonBox.Close).setAutoDefault(False)
         # launch help from button
         self.buttonBox.helpRequested.connect(self.help)
@@ -121,9 +121,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnCanvasBbox.clicked.connect(self.set_bbox_from_map)
         self.btnGlobalBbox.clicked.connect(self.set_bbox_global)
         self.btnGlobalBbox.setAutoDefault(False)
-        #Reverse Geocode
+        # Reverse Geocode
         self.leWhere.returnPressed.connect(self.set_bbox_from_r_geocode)
-        #Layer List
+        # Layer List
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
 
         # navigation buttons
@@ -137,7 +137,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnAddToWcs.clicked.connect(self.add_to_ows)
         self.btnShowXml.clicked.connect(self.show_xml)
 
-        #Misc
+        # Misc
         self.map.layersChanged.connect(self.populate_layer_list)
 
         self.manageGui()
@@ -374,30 +374,32 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     # Search tab
 
-    def draw_search_footprint(self):
-        """Draw BBox visualising the Search extension"""
-        #TODO figure how to call; also i think there's a bug in the code
-
-        # if the record has a bbox, show a footprint on the map
-        # ul,ur,lr,ll
-        points = [[QgsPoint(float(self.leNorth.text()), float(self.leWest.text())),
-                  QgsPoint(float(self.leNorth.text()), float(self.leEast.text())),
-                  QgsPoint(float(self.leSouth.text()), float(self.leEast.text())),
-                  QgsPoint(float(self.leSouth.text()), float(self.leWest.text()))]]
-
-        src = QgsCoordinateReferenceSystem(4326)
-        dst = self.map.mapRenderer().destinationCrs()
-        geom = QgsGeometry.fromPolygon(points)
-        if src.authid() != dst.authid():
-            ctr = QgsCoordinateTransform(src, dst)
-            try:
-                geom.transform(ctr)
-            except Exception, err:
-                QMessageBox.warning(
-                    self,
-                    self.tr('Coordinate Transformation Error'),
-                    str(err))
-        self.misc_rubber_band.setToGeometry(geom, None)
+    # def draw_search_footprint(self):
+    #     """Draw BBox visualising the Search extension"""
+    #     # TODO figure how to call; also i think there's a bug in the code
+    #
+    #     # if the record has a bbox, show a footprint on the map
+    #     # ul,ur,lr,ll
+    #     points = [
+    #         [QgsPoint(float(self.leNorth.text()), float(self.leWest.text())),
+    #         QgsPoint(float(self.leNorth.text()), float(self.leEast.text())),
+    #         QgsPoint(float(self.leSouth.text()), float(self.leEast.text())),
+    #         QgsPoint(float(self.leSouth.text()), float(self.leWest.text()))]
+    #     ]
+    #
+    #     src = QgsCoordinateReferenceSystem(4326)
+    #     dst = self.map.mapRenderer().destinationCrs()
+    #     geom = QgsGeometry.fromPolygon(points)
+    #     if src.authid() != dst.authid():
+    #         ctr = QgsCoordinateTransform(src, dst)
+    #         try:
+    #             geom.transform(ctr)
+    #         except Exception, err:
+    #             QMessageBox.warning(
+    #                 self,
+    #                 self.tr('Coordinate Transformation Error'),
+    #                 str(err))
+    #     self.misc_rubber_band.setToGeometry(geom, None)
 
     def populate_layer_list(self):
         """populate layer list with active layers """
@@ -493,7 +495,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         """set bounding box from reverse geolocation"""
 
 
-        #TODO: Check if internets are up and or catch exceptions
+        # TODO: Check if internets are up and or catch exceptions
         if self.rbGeolocationService_Google.isChecked():
             # List of google domains:
             # http://en.wikipedia.org/wiki/List_of_Google_domains
@@ -506,9 +508,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         try:
             location = geolocator.geocode(self.leWhere.text())
-            #print location.raw
-            #x,y = location.latitude, location.longitude
-            ullr = geolocator_to_bbox(geolocator_type=geotype, resp=location.raw)
+            ullr = geolocator_to_bbox(geolocator_type=geotype,
+                                      resp=location.raw)
             print ullr
             self.leWhere.setText(location.address)
             # hackish way parsing results
@@ -615,8 +616,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         position = self.catalog.results['returned'] + self.startfrom
 
         msg = self.tr('Showing %d - %d of %d result%s') % \
-                      (self.startfrom + 1, position,
-                       self.catalog.results['matches'],
+                     (self.startfrom + 1, position,
+                      self.catalog.results['matches'],
                       's'[self.catalog.results['matches'] == 1:])
 
         self.lblResults.setText(msg)
