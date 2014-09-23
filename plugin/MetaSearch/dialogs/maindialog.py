@@ -90,12 +90,12 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.misc_rubber_band.setColor(QColor(0, 0, 255, 75)) #Blue
         self.misc_rubber_band.setWidth(5)
 
-
         self.LayerDic = {}
 
         # form inputs
         self.startfrom = 0
         self.maxrecords = 10
+        self.timeout = 10
         self.constraints = []
 
         # Servers tab
@@ -167,7 +167,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     def showEvent(self, QShowEvent):
         self.populate_layer_list()
-        #pass
 
     # Servers tab
 
@@ -384,14 +383,14 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         #TODO figure how to call; also i think there's a bug in the code
 
         # if the record has a bbox, show a footprint on the map
-
-        points = [[QgsPoint(float(self.leNorth.text()),float(self.leWest.text())), #ul
-                  QgsPoint(float(self.leNorth.text()),float(self.leEast.text())), #ur
-                  QgsPoint(float(self.leSouth.text()),float(self.leEast.text())), #lr
-                  QgsPoint(float(self.leSouth.text()),float(self.leWest.text()))]] #ll
+        # ul,ur,lr,ll
+        points = [[QgsPoint(float(self.leNorth.text()), float(self.leWest.text())),
+                  QgsPoint(float(self.leNorth.text()), float(self.leEast.text())),
+                  QgsPoint(float(self.leSouth.text()), float(self.leEast.text())),
+                  QgsPoint(float(self.leSouth.text()), float(self.leWest.text()))]]
 
         src = QgsCoordinateReferenceSystem(4326)
-        dst = self.map.mapRenderer().destinationCrs() #deprecatated?
+        dst = self.map.mapRenderer().destinationCrs()
         geom = QgsGeometry.fromPolygon(points)
         if src.authid() != dst.authid():
             ctr = QgsCoordinateTransform(src, dst)
@@ -501,7 +500,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         if self.rbGeolocationService_Google.isChecked():
             # List of google domains:
             # http://en.wikipedia.org/wiki/List_of_Google_domains
-            geolocator = GoogleV3(timeout=4,domain="maps.google.gr")
+            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
             geotype = "googlev3"
         elif self.rbGeolocationService_OSM.isChecked():
             geolocator = Nominatim(view_box=(19.58,34.88,28.3,41.75),timeout=4)
@@ -509,7 +508,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         try:
             location = geolocator.geocode(self.leWhere.text())
             #x,y = location.latitude, location.longitude
-            ullr = geolocator_to_bbox(geolocator_type=geotype,resp=location._raw)
+            ullr = geolocator_to_bbox(geolocator_type=geotype, resp=location.raw)
 
             self.leWhere.setText(location.address)
             # hackish way parsing results
@@ -814,7 +813,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         service_type = stype[0]
 
-        # connect dialog signals to iface slots
+        # connect dialog signals to interface slots
         if service_type == 'OGC:WMS/OGC:WMTS':
             ows_provider.connect(
                 ows_provider,
@@ -1007,6 +1006,7 @@ def _get_field_value(field):
 
     return value
 
+
 def geolocator_to_bbox(geolocator_type, resp):
     """Parses the geolocation service's respond as ullr"""
 
@@ -1021,7 +1021,8 @@ def geolocator_to_bbox(geolocator_type, resp):
         minx = float(resp[u'boundingbox'][2])
         miny = float(resp[u'boundingbox'][0])
 
-    return maxx,maxy,minx,miny
+    return maxx, maxy, minx, miny
+
 
 def bbox_to_polygon(bbox):
     """converts OWSLib bbox object to list of QgsPoint objects"""
