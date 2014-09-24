@@ -34,6 +34,7 @@ from urllib2 import build_opener, install_opener, ProxyHandler
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
                        QgsProviderRegistry)
+
 from qgis.gui import QgsRubberBand
 
 from PyQt4.QtCore import (QSettings, Qt, SIGNAL, SLOT)
@@ -508,10 +509,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # we're hitting the backspace key, dont spam the service
         # check /ui/customW/mLineEdit to add more ignore keys
-        if  self.leWhere.ignore:
+        if self.leWhere.ignore:
             return
 
-        if len(self.leWhere.text()) < 4 : # Start working after 3 chars
+        if len(self.leWhere.text()) < 4:  # Start working after 3 chars
             self.leWhere.setCompleter(None)
             return
 
@@ -522,7 +523,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
             geotype = "nominatim"
         # A list of geopy.Locations
-        locations = geolocator.geocode(self.leWhere.text(),exactly_one=False)
+        locations = geolocator.geocode(self.leWhere.text(), exactly_one=False)
         self.completerList = []
         try:
             if locations is not None:
@@ -531,11 +532,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             print self.completerList
         except:
             pass
-        self.completer = QCompleter(self.completerList,self)
+        self.completer = QCompleter(self.completerList, self)
         self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.leWhere.setCompleter(self.completer)
-
 
     def set_bbox_from_r_geocode(self):
         """set bounding box from reverse geolocation"""
@@ -1081,6 +1081,7 @@ def geolocator_to_bbox(geolocator_type, resp):
         return maxx, maxy, minx, miny
     except:
         return
+
 
 def bbox_to_polygon(bbox):
     """converts OWSLib bbox object to list of QgsPoint objects"""
