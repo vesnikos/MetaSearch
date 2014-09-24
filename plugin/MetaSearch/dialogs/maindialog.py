@@ -31,15 +31,15 @@ import json
 import os.path
 from urllib2 import build_opener, install_opener, ProxyHandler
 
-from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT
-from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
-                         QDialogButtonBox, QMessageBox, QTreeWidgetItem,
-                         QWidget)
-
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
                        QgsProviderRegistry)
 from qgis.gui import QgsRubberBand
+
+from PyQt4.QtCore import (QSettings, Qt, SIGNAL, SLOT)
+from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
+                         QDialogButtonBox, QMessageBox, QTreeWidgetItem,
+                         QWidget,QCompleter,QKeyEvent,QLineEdit)
 
 from owslib.csw import CatalogueServiceWeb
 from owslib.fes import BBox, PropertyIsLike
@@ -74,6 +74,15 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         QDialog.__init__(self)
         self.setupUi(self)
+
+        # dev
+        self.completerList = []
+        self.itemList = []
+        self.completer = None
+        self.leWhere.textEdited.connect(self.populate_autocomplete)
+        # self.leWhere.setFocusPolicy(Qt.StrongFocus)
+        # self.setFocusProxy(self.leWhere)
+        # self.leWhere.setFocus(True)
 
         self.iface = iface
         self.map = iface.mapCanvas()
@@ -167,6 +176,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     def showEvent(self, QShowEvent):
         self.populate_layer_list()
+
+    # def keyPressEvent(self, QKeyEvent):
+    #     print QKeyEvent.key()
 
     # Servers tab
 
@@ -499,6 +511,38 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leSouth.setText('-90')
         self.leWest.setText('-180')
         self.leEast.setText('180')
+
+    def populate_autocomplete(self):
+        """populate the autocomplete list """
+
+        if  self.leWhere.ignore:
+            print "ignoring"
+
+        if len(self.leWhere.text()) < 4 : # Start working after 3 chars
+            self.leWhere.setCompleter(None)
+            return
+
+        if self.rbGeolocationService_Google.isChecked():
+            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
+            geotype = "googlev3"
+        elif self.rbGeolocationService_OSM.isChecked():
+            geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
+            geotype = "nominatim"
+        # A list of geopy.Locations
+        locations = geolocator.geocode(self.leWhere.text(),exactly_one=False)
+        self.completerList = []
+        try:
+            if locations is not None:
+                for l in locations:
+                    self.completerList.append(unicode(l.address))
+            print self.completerList
+        except:
+            pass
+        self.completer = QCompleter(self.completerList,self)
+        self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.leWhere.setCompleter(self.completer)
+
 
     def set_bbox_from_r_geocode(self):
         """set bounding box from reverse geolocation"""
@@ -1029,19 +1073,21 @@ def _get_field_value(field):
 def geolocator_to_bbox(geolocator_type, resp):
     """Parses the geolocation service's respond as ullr"""
 
-    if geolocator_type == "googlev3":
-        maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
-        maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
-        miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
-        minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
-    elif geolocator_type == "nominatim":
-        maxx = float(resp[u'boundingbox'][3])
-        maxy = float(resp[u'boundingbox'][1])
-        minx = float(resp[u'boundingbox'][2])
-        miny = float(resp[u'boundingbox'][0])
+    try:
+        if geolocator_type == "googlev3":
+            maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
+            maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
+            miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
+            minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
+        elif geolocator_type == "nominatim":
+            maxx = float(resp[u'boundingbox'][3])
+            maxy = float(resp[u'boundingbox'][1])
+            minx = float(resp[u'boundingbox'][2])
+            miny = float(resp[u'boundingbox'][0])
 
-    return maxx, maxy, minx, miny
-
+        return maxx, maxy, minx, miny
+    except:
+        return
 
 def bbox_to_polygon(bbox):
     """converts OWSLib bbox object to list of QgsPoint objects"""

@@ -25,7 +25,9 @@
 
 import os
 import site
+import sys
 
+sys.path.append(os.path.join(os.path.dirname(__file__),"ui"))
 site.addsitedir(os.path.abspath('%s/ext-libs' % os.path.dirname(__file__)))
 
 

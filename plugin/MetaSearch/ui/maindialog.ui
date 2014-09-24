@@ -42,7 +42,7 @@
              <number>7</number>
             </property>
             <item row="1" column="2" colspan="2">
-             <widget class="QLineEdit" name="leWhere">
+             <widget class="mLineEdit" name="leWhere">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -725,6 +725,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>mLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>customW.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>leKeywords</tabstop>
