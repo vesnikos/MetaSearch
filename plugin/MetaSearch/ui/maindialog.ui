@@ -725,6 +725,44 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>leKeywords</tabstop>
+  <tabstop>cmbConnectionsSearch</tabstop>
+  <tabstop>leWhere</tabstop>
+  <tabstop>cmbLayerList</tabstop>
+  <tabstop>leNorth</tabstop>
+  <tabstop>leWest</tabstop>
+  <tabstop>leEast</tabstop>
+  <tabstop>leSouth</tabstop>
+  <tabstop>btnGlobalBbox</tabstop>
+  <tabstop>btnCanvasBbox</tabstop>
+  <tabstop>btnSearch</tabstop>
+  <tabstop>btnShowXml</tabstop>
+  <tabstop>treeRecords</tabstop>
+  <tabstop>btnFirst</tabstop>
+  <tabstop>btnPrev</tabstop>
+  <tabstop>btnNext</tabstop>
+  <tabstop>btnLast</tabstop>
+  <tabstop>btnAddToWms</tabstop>
+  <tabstop>btnAddToWfs</tabstop>
+  <tabstop>btnAddToWcs</tabstop>
+  <tabstop>buttonBox</tabstop>
+  <tabstop>cmbConnectionsServices</tabstop>
+  <tabstop>btnServerInfo</tabstop>
+  <tabstop>btnCapabilities</tabstop>
+  <tabstop>btnNew</tabstop>
+  <tabstop>btnEdit</tabstop>
+  <tabstop>btnDelete</tabstop>
+  <tabstop>btnSave</tabstop>
+  <tabstop>textMetadata</tabstop>
+  <tabstop>btnAddDefault</tabstop>
+  <tabstop>btnLoad</tabstop>
+  <tabstop>spnRecords</tabstop>
+  <tabstop>rbGeolocationService_Google</tabstop>
+  <tabstop>rbGeolocationService_OSM</tabstop>
+  <tabstop>spnTimeout</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
