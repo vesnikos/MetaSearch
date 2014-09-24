@@ -150,10 +150,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.geolocator_errors = [
             self.tr(u"Error: GeoQuerry Quota Exceeded"),
             self.tr(u"Error: GeoQuerry Quota Exceeded"),
-            self.tr(u"Error: Using Global Coverage")
-            ]
-
-
+            self.tr(u"Error: Using Global Coverage")]
 
         self.manageGui()
 
