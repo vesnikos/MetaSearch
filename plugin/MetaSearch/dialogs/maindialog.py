@@ -39,7 +39,7 @@ from qgis.gui import QgsRubberBand
 from PyQt4.QtCore import (QSettings, Qt, SIGNAL, SLOT)
 from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
                          QDialogButtonBox, QMessageBox, QTreeWidgetItem,
-                         QWidget,QCompleter,QKeyEvent,QLineEdit)
+                         QWidget, QCompleter)
 
 from owslib.csw import CatalogueServiceWeb
 from owslib.fes import BBox, PropertyIsLike
@@ -75,15 +75,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         QDialog.__init__(self)
         self.setupUi(self)
 
-        # dev
-        self.completerList = []
-        self.itemList = []
-        self.completer = None
-        self.leWhere.textEdited.connect(self.populate_autocomplete)
-        # self.leWhere.setFocusPolicy(Qt.StrongFocus)
-        # self.setFocusProxy(self.leWhere)
-        # self.leWhere.setFocus(True)
-
         self.iface = iface
         self.map = iface.mapCanvas()
         self.settings = QSettings()
@@ -91,6 +82,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.catalog_url = None
         self.context = StaticContext()
         self.LayerDic = {}
+        self.completerList = []
+        self.completer = None
 
         # CSW Footprint
         self.rubber_band = QgsRubberBand(self.map, True)  # True = a polygon
@@ -135,6 +128,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # Reverse Geocode
         self.leWhere.returnPressed.connect(self.set_bbox_from_r_geocode)
         self.leWhere.editingFinished.connect(self.togglegeolocprime)
+        self.leWhere.textEdited.connect(self.populate_autocomplete)
         # Layer List
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
 
@@ -176,9 +170,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     def showEvent(self, QShowEvent):
         self.populate_layer_list()
-
-    # def keyPressEvent(self, QKeyEvent):
-    #     print QKeyEvent.key()
 
     # Servers tab
 
@@ -515,8 +506,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def populate_autocomplete(self):
         """populate the autocomplete list """
 
+        # we're hitting the backspace key, dont spam the service
+        # check /ui/customW/mLineEdit to add more ignore keys
         if  self.leWhere.ignore:
-            print "ignoring"
+            return
 
         if len(self.leWhere.text()) < 4 : # Start working after 3 chars
             self.leWhere.setCompleter(None)
