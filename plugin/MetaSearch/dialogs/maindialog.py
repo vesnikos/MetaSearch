@@ -147,6 +147,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # Misc
         self.map.layersChanged.connect(self.populate_layer_list)
         self._geolocationPrime = False
+        self.geolocator_errors = [
+            self.tr(u"Error: GeoQuerry Quota Exceeded"),
+            self.tr(u"Error: GeoQuerry Quota Exceeded"),
+            self.tr(u"Error: Using Global Coverage")
+            ]
+
+
 
         self.manageGui()
 
@@ -516,8 +523,12 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWhere.setCompleter(None)
             return
 
+        if self.leWhere.text().startswith(self.geolocator_errors[0][:4]):
+            # The first 3 letters of the error message is in the text
+            return
+
         if self.rbGeolocationService_Google.isChecked():
-            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
+            geolocator = GoogleV3(timeout=4, domain="maps.google.com")
             geotype = "googlev3"
         elif self.rbGeolocationService_OSM.isChecked():
             geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
@@ -525,13 +536,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # A list of geopy.Locations
         locations = geolocator.geocode(self.leWhere.text(), exactly_one=False)
         self.completerList = []
-        try:
-            if locations is not None:
-                for l in locations:
+        if locations is not None:
+            for l in locations:
+                if geolocator_to_bbox(geotype, l.raw):
                     self.completerList.append(unicode(l.address))
-            print self.completerList
-        except:
-            pass
         self.completer = QCompleter(self.completerList, self)
         self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
@@ -554,7 +562,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             location = geolocator.geocode(self.leWhere.text())
             ullr = geolocator_to_bbox(geolocator_type=geotype,
                                       resp=location.raw)
-            print ullr
             self.leWhere.setText(location.address)
             # hackish way parsing results
             maxx, maxy, minx, miny = ullr
@@ -565,13 +572,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWest.setText(str(minx))
             self.leEast.setText(str(maxx))
         except (GeocoderTimedOut, GeocoderUnavailable):
-            self.leWhere.setText(self.tr(u"Err: GeoQuerry Quota Exceeded"))
+            self.leWhere.setText(self.geolocator_errors[0])
             self.set_bbox_global()
         except GeocoderQuotaExceeded:
-            self.leWhere.setText(self.tr(u"Err: GeoQuerry Quota Exceeded"))
+            self.leWhere.setText(self.geolocator_errors[1])
             self.set_bbox_global()
-        except (GeopyError, AttributeError, KeyError):
-            self.leWhere.setText(self.tr(u"Err: Using Global Coverage"))
+        except (GeopyError, AttributeError, KeyError, TypeError):
+            self.leWhere.setText(self.geolocator_errors[2])
             self.set_bbox_global()
 
     def search(self):
@@ -1080,6 +1087,7 @@ def geolocator_to_bbox(geolocator_type, resp):
 
         return maxx, maxy, minx, miny
     except:
+        # Sometimes the geolocator returns POIs of interest without bbox
         return
 
 

@@ -30,7 +30,7 @@ __author__ = 'vesnikos'
 __date__ = '24/09/2014'
 
 from PyQt4.QtCore import *
-from PyQt4.QtGui import QLineEdit, QWidget
+from PyQt4.QtGui import QLineEdit
 
 
 class mLineEdit(QLineEdit):
@@ -48,6 +48,6 @@ class mLineEdit(QLineEdit):
         if (event.type() == event.KeyPress) and \
                 (event.key() == Qt.Key_Backspace):
             self.ignore = True
-        if event.type() == event.KeyRelease:
+        else:
             self.ignore = False
         return QLineEdit.event(self, event)
