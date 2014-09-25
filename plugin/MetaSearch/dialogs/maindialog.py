@@ -128,7 +128,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnGlobalBbox.setAutoDefault(False)
         # Reverse Geocode
         self.leWhere.returnPressed.connect(self.set_bbox_from_r_geocode)
-        self.leWhere.editingFinished.connect(self.togglegeolocprime)
         self.leWhere.textEdited.connect(self.populate_autocomplete)
         # Layer List
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
@@ -146,8 +145,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Misc
         self.map.layersChanged.connect(self.populate_layer_list)
-        self._geolocationPrime = False
-        self.geolocator_errors = [
+        self._geolocator_errors = [
             self.tr(u"Error: GeoQuerry Quota Exceeded"),
             self.tr(u"Error: GeoQuerry Quota Exceeded"),
             self.tr(u"Error: Using Global Coverage")]
@@ -520,12 +518,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWhere.setCompleter(None)
             return
 
-        if self.leWhere.text().startswith(self.geolocator_errors[0][:4]):
-            # The first 3 letters of the error message is in the text
+        if any(map((lambda foo: foo[:5].lower() in self.leWhere.text().lower()),
+                   self._geolocator_errors)):
+           # The first 4 letters of the error message is in the text
             return
 
         if self.rbGeolocationService_Google.isChecked():
-            geolocator = GoogleV3(timeout=4, domain="maps.google.com")
+            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
             geotype = "googlev3"
         elif self.rbGeolocationService_OSM.isChecked():
             geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
@@ -548,7 +547,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         if self.rbGeolocationService_Google.isChecked():
             # List of google domains:
             # http://en.wikipedia.org/wiki/List_of_Google_domains
-            geolocator = GoogleV3(timeout=4, domain="maps.google.com")
+            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
             geotype = "googlev3"
 
         elif self.rbGeolocationService_OSM.isChecked():
@@ -569,13 +568,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWest.setText(str(minx))
             self.leEast.setText(str(maxx))
         except (GeocoderTimedOut, GeocoderUnavailable):
-            self.leWhere.setText(self.geolocator_errors[0])
+            self.leWhere.setText(self._geolocator_errors[0])
             self.set_bbox_global()
         except GeocoderQuotaExceeded:
-            self.leWhere.setText(self.geolocator_errors[1])
+            self.leWhere.setText(self._geolocator_errors[1])
             self.set_bbox_global()
         except (GeopyError, AttributeError, KeyError, TypeError):
-            self.leWhere.setText(self.geolocator_errors[2])
+            self.leWhere.setText(self._geolocator_errors[2])
             self.set_bbox_global()
 
     def search(self):
@@ -583,7 +582,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.catalog = None
         self.constraints = []
-        if self._geolocationPrime:
+        if self.leWhere.text() is not "":
             self.set_bbox_from_r_geocode()
 
         # clear all fields and disable buttons
@@ -1031,10 +1030,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
             conn = '%s://%s%s%s' % (ptype, proxy_up, host, proxy_port)
             install_opener(build_opener(ProxyHandler({ptype: conn})))
-
-    def togglegeolocprime(self):
-        self._geolocationPrime = not self._geolocationPrime
-
 
 def save_connections():
     """save servers to list"""
