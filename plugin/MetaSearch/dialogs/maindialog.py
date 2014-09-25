@@ -518,7 +518,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWhere.setCompleter(None)
             return
 
-        if any(map((lambda foo: foo[:5].lower() in self.leWhere.text().lower()),
+        if any(map((lambda foo: foo[:5].lower() in self.leWhere.text().lower),
                    self._geolocator_errors)):
            # The first 4 letters of the error message is in the text
             return
@@ -1030,6 +1030,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
             conn = '%s://%s%s%s' % (ptype, proxy_up, host, proxy_port)
             install_opener(build_opener(ProxyHandler({ptype: conn})))
+
 
 def save_connections():
     """save servers to list"""
