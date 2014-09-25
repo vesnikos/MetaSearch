@@ -524,7 +524,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             return
 
         if self.rbGeolocationService_Google.isChecked():
-            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
+            geolocator = GoogleV3(timeout=4, domain="maps.google.com")
             geotype = "googlev3"
         elif self.rbGeolocationService_OSM.isChecked():
             geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
