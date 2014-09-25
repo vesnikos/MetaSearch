@@ -547,7 +547,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         if self.rbGeolocationService_Google.isChecked():
             # List of google domains:
             # http://en.wikipedia.org/wiki/List_of_Google_domains
-            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
+            geolocator = GoogleV3(timeout=4, domain="maps.google.com")
             geotype = "googlev3"
 
         elif self.rbGeolocationService_OSM.isChecked():
