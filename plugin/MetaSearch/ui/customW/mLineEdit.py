@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
+# CSW Client
+# ---------------------------------------------------------
+# QGIS Catalogue Service client.
+#
 # Copyright (C) 2010 NextGIS (http://nextgis.org),
 #                    Alexander Bruy (alexander.bruy@gmail.com),
-#                    Maxim Dubinin (sim@gis-lab.info),
+#                    Maxim Dubinin (sim@gis-lab.info)
 #
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
 #
@@ -22,16 +26,28 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 ###############################################################################
+__author__ = 'vesnikos'
+__date__ = '24/09/2014'
 
-import os
-import site
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "ui"))
-site.addsitedir(os.path.abspath('%s/ext-libs' % os.path.dirname(__file__)))
+from PyQt4.QtCore import *
+from PyQt4.QtGui import QLineEdit
 
 
-def classFactory(iface):
-    """invoke plugin"""
-    from MetaSearch.plugin import MetaSearchPlugin
-    return MetaSearchPlugin(iface)
+class mLineEdit(QLineEdit):
+    """ Test Custom Widget """
+
+    def __init__(self, *args):
+        QLineEdit.__init__(self, *args)
+        self.ignore = False
+
+    @staticmethod
+    def ignore(self):
+        return self.ignore
+
+    def event(self, event):
+        if (event.type() == event.KeyPress) and \
+                (event.key() == Qt.Key_Backspace):
+            self.ignore = True
+        else:
+            self.ignore = False
+        return QLineEdit.event(self, event)

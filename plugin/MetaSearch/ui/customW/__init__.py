@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
+# CSW Client
+# ---------------------------------------------------------
+# QGIS Catalogue Service client.
+#
 # Copyright (C) 2010 NextGIS (http://nextgis.org),
 #                    Alexander Bruy (alexander.bruy@gmail.com),
-#                    Maxim Dubinin (sim@gis-lab.info),
+#                    Maxim Dubinin (sim@gis-lab.info)
 #
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
 #
@@ -22,16 +26,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 ###############################################################################
-
-import os
-import site
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "ui"))
-site.addsitedir(os.path.abspath('%s/ext-libs' % os.path.dirname(__file__)))
+__author__ = 'vesnikos'
+__date__ = '24/09/2014'
 
 
-def classFactory(iface):
-    """invoke plugin"""
-    from MetaSearch.plugin import MetaSearchPlugin
-    return MetaSearchPlugin(iface)
+from .mLineEdit import *

@@ -31,15 +31,16 @@ import json
 import os.path
 from urllib2 import build_opener, install_opener, ProxyHandler
 
-from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT
-from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
-                         QDialogButtonBox, QMessageBox, QTreeWidgetItem,
-                         QWidget)
-
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
                        QgsProviderRegistry)
+
 from qgis.gui import QgsRubberBand
+
+from PyQt4.QtCore import (QSettings, Qt, SIGNAL, SLOT)
+from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
+                         QDialogButtonBox, QMessageBox, QTreeWidgetItem,
+                         QWidget, QCompleter)
 
 from owslib.csw import CatalogueServiceWeb
 from owslib.fes import BBox, PropertyIsLike
@@ -82,6 +83,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.catalog_url = None
         self.context = StaticContext()
         self.LayerDic = {}
+        self.completerList = []
+        self.completer = None
 
         # CSW Footprint
         self.rubber_band = QgsRubberBand(self.map, True)  # True = a polygon
@@ -125,7 +128,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnGlobalBbox.setAutoDefault(False)
         # Reverse Geocode
         self.leWhere.returnPressed.connect(self.set_bbox_from_r_geocode)
-        self.leWhere.editingFinished.connect(self.togglegeolocprime)
+        self.leWhere.textEdited.connect(self.populate_autocomplete)
         # Layer List
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
 
@@ -142,7 +145,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Misc
         self.map.layersChanged.connect(self.populate_layer_list)
-        self._geolocationPrime = False
+        self._geolocator_errors = [
+            self.tr(u"Error: GeoQuerry Quota Exceeded"),
+            self.tr(u"Error: GeoQuerry Quota Exceeded"),
+            self.tr(u"Error: Using Global Coverage")]
 
         self.manageGui()
 
@@ -500,6 +506,41 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWest.setText('-180')
         self.leEast.setText('180')
 
+    def populate_autocomplete(self):
+        """populate the autocomplete list """
+
+        # we're hitting the backspace key, don't spam the service
+        # check /ui/customW/mLineEdit to add more ignore keys
+        if self.leWhere.ignore:
+            return
+
+        if len(self.leWhere.text()) < 4:  # Start working after 3 chars
+            self.leWhere.setCompleter(None)
+            return
+
+        if any(map((lambda foo: foo[:5].lower() in self.leWhere.text().lower),
+                   self._geolocator_errors)):
+            # The first 4 letters of the error message is in the text
+            return
+
+        if self.rbGeolocationService_Google.isChecked():
+            geolocator = GoogleV3(timeout=4, domain="maps.google.com")
+            geotype = "googlev3"
+        elif self.rbGeolocationService_OSM.isChecked():
+            geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
+            geotype = "nominatim"
+        # A list of geopy.Locations
+        locations = geolocator.geocode(self.leWhere.text(), exactly_one=False)
+        self.completerList = []
+        if locations is not None:
+            for l in locations:
+                if geolocator_to_bbox(geotype, l.raw):
+                    self.completerList.append(unicode(l.address))
+        self.completer = QCompleter(self.completerList, self)
+        self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.leWhere.setCompleter(self.completer)
+
     def set_bbox_from_r_geocode(self):
         """set bounding box from reverse geolocation"""
 
@@ -517,7 +558,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             location = geolocator.geocode(self.leWhere.text())
             ullr = geolocator_to_bbox(geolocator_type=geotype,
                                       resp=location.raw)
-            print ullr
             self.leWhere.setText(location.address)
             # hackish way parsing results
             maxx, maxy, minx, miny = ullr
@@ -528,13 +568,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWest.setText(str(minx))
             self.leEast.setText(str(maxx))
         except (GeocoderTimedOut, GeocoderUnavailable):
-            self.leWhere.setText(self.tr(u"Err: GeoQuerry Quota Exceeded"))
+            self.leWhere.setText(self._geolocator_errors[0])
             self.set_bbox_global()
         except GeocoderQuotaExceeded:
-            self.leWhere.setText(self.tr(u"Err: GeoQuerry Quota Exceeded"))
+            self.leWhere.setText(self._geolocator_errors[1])
             self.set_bbox_global()
-        except (GeopyError, AttributeError, KeyError):
-            self.leWhere.setText(self.tr(u"Err: Using Global Coverage"))
+        except (GeopyError, AttributeError, KeyError, TypeError):
+            self.leWhere.setText(self._geolocator_errors[2])
             self.set_bbox_global()
 
     def search(self):
@@ -542,7 +582,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.catalog = None
         self.constraints = []
-        if self._geolocationPrime:
+        if self.leWhere.text() is not "":
             self.set_bbox_from_r_geocode()
 
         # clear all fields and disable buttons
@@ -991,9 +1031,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             conn = '%s://%s%s%s' % (ptype, proxy_up, host, proxy_port)
             install_opener(build_opener(ProxyHandler({ptype: conn})))
 
-    def togglegeolocprime(self):
-        self._geolocationPrime = not self._geolocationPrime
-
 
 def save_connections():
     """save servers to list"""
@@ -1029,18 +1066,22 @@ def _get_field_value(field):
 def geolocator_to_bbox(geolocator_type, resp):
     """Parses the geolocation service's respond as ullr"""
 
-    if geolocator_type == "googlev3":
-        maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
-        maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
-        miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
-        minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
-    elif geolocator_type == "nominatim":
-        maxx = float(resp[u'boundingbox'][3])
-        maxy = float(resp[u'boundingbox'][1])
-        minx = float(resp[u'boundingbox'][2])
-        miny = float(resp[u'boundingbox'][0])
+    try:
+        if geolocator_type == "googlev3":
+            maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
+            maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
+            miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
+            minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
+        elif geolocator_type == "nominatim":
+            maxx = float(resp[u'boundingbox'][3])
+            maxy = float(resp[u'boundingbox'][1])
+            minx = float(resp[u'boundingbox'][2])
+            miny = float(resp[u'boundingbox'][0])
 
-    return maxx, maxy, minx, miny
+        return maxx, maxy, minx, miny
+    except:
+        # Sometimes the geolocator returns POIs of interest without bbox
+        return
 
 
 def bbox_to_polygon(bbox):
