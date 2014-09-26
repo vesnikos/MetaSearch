@@ -26,8 +26,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 ###############################################################################
-__author__ = 'vesnikos'
-__date__ = '24/09/2014'
 
 
-from .mLineEdit import *
+from mLineEdit import mLineEdit
