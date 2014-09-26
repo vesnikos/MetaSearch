@@ -509,7 +509,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def populate_autocomplete(self):
         """populate the autocomplete list """
 
-        # we're hitting the backspace key, dont spam the service
+        # we're hitting the backspace key, don't spam the service
         # check /ui/customW/mLineEdit to add more ignore keys
         if self.leWhere.ignore:
             return
@@ -520,7 +520,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         if any(map((lambda foo: foo[:5].lower() in self.leWhere.text().lower),
                    self._geolocator_errors)):
-           # The first 4 letters of the error message is in the text
+            # The first 4 letters of the error message is in the text
             return
 
         if self.rbGeolocationService_Google.isChecked():
