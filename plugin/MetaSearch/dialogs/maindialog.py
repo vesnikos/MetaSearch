@@ -582,7 +582,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.catalog = None
         self.constraints = []
-        if self.leWhere.text() is not "":
+        if self.leWhere.text() != "":
             self.set_bbox_from_r_geocode()
 
         # clear all fields and disable buttons
