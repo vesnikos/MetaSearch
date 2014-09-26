@@ -518,10 +518,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWhere.setCompleter(None)
             return
 
-        if any(map((lambda foo: foo[:5].lower() in self.leWhere.text().lower),
+        if any(map(lambda foo: self.leWhere.text().lower()[:5] in foo.lower(),
                    self._geolocator_errors)):
-            # The first 4 letters of the error message is in the text
-            return
+            self.leWhere.setCompleter(None)
+            return  # The first 5 letters of the error message is in the text
 
         if self.rbGeolocationService_Google.isChecked():
             geolocator = GoogleV3(timeout=4, domain="maps.google.com")
