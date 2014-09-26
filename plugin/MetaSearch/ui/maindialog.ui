@@ -163,7 +163,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>100</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
@@ -214,8 +214,8 @@
              <widget class="QLineEdit" name="leSouth">
               <property name="minimumSize">
                <size>
-                <width>85</width>
-                <height>0</height>
+                <width>180</width>
+                <height>35</height>
                </size>
               </property>
               <property name="text">
@@ -574,9 +574,9 @@
        <widget class="QLabel" name="label_5">
         <property name="geometry">
          <rect>
-          <x>30</x>
+          <x>20</x>
           <y>30</y>
-          <width>41</width>
+          <width>51</width>
           <height>26</height>
          </rect>
         </property>
@@ -598,16 +598,16 @@
         <property name="geometry">
          <rect>
           <x>190</x>
-          <y>30</y>
-          <width>101</width>
-          <height>26</height>
+          <y>25</y>
+          <width>131</width>
+          <height>31</height>
          </rect>
         </property>
         <property name="text">
          <string>results at a time</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </widget>
@@ -638,17 +638,29 @@
        <widget class="QRadioButton" name="rbGeolocationService_Google">
         <property name="geometry">
          <rect>
-          <x>30</x>
+          <x>20</x>
           <y>30</y>
-          <width>95</width>
-          <height>20</height>
+          <width>111</width>
+          <height>31</height>
          </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>110</width>
+          <height>30</height>
+         </size>
         </property>
         <property name="layoutDirection">
          <enum>Qt::RightToLeft</enum>
         </property>
         <property name="text">
-         <string>Google     </string>
+         <string>Google   </string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -657,11 +669,17 @@
        <widget class="QRadioButton" name="rbGeolocationService_OSM">
         <property name="geometry">
          <rect>
-          <x>140</x>
+          <x>150</x>
           <y>30</y>
-          <width>151</width>
-          <height>20</height>
+          <width>171</width>
+          <height>31</height>
          </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>170</width>
+          <height>30</height>
+         </size>
         </property>
         <property name="layoutDirection">
          <enum>Qt::RightToLeft</enum>
@@ -700,13 +718,16 @@
         <property name="geometry">
          <rect>
           <x>140</x>
-          <y>30</y>
-          <width>46</width>
-          <height>31</height>
+          <y>20</y>
+          <width>71</width>
+          <height>41</height>
          </rect>
         </property>
         <property name="text">
          <string>seconds</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </widget>
@@ -715,11 +736,17 @@
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Close|QDialogButtonBox::Help</set>
+     </property>
+     <property name="centerButtons">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -758,17 +785,17 @@
   <tabstop>cmbConnectionsServices</tabstop>
   <tabstop>btnServerInfo</tabstop>
   <tabstop>btnCapabilities</tabstop>
+  <tabstop>btnAddDefault</tabstop>
   <tabstop>btnNew</tabstop>
   <tabstop>btnEdit</tabstop>
   <tabstop>btnDelete</tabstop>
+  <tabstop>btnLoad</tabstop>
   <tabstop>btnSave</tabstop>
   <tabstop>textMetadata</tabstop>
-  <tabstop>btnAddDefault</tabstop>
-  <tabstop>btnLoad</tabstop>
   <tabstop>spnRecords</tabstop>
+  <tabstop>spnTimeout</tabstop>
   <tabstop>rbGeolocationService_Google</tabstop>
   <tabstop>rbGeolocationService_OSM</tabstop>
-  <tabstop>spnTimeout</tabstop>
  </tabstops>
  <resources/>
  <connections>
