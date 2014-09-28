@@ -54,6 +54,7 @@ from MetaSearch import link_types
 from MetaSearch.dialogs.manageconnectionsdialog import ManageConnectionsDialog
 from MetaSearch.dialogs.newconnectiondialog import NewConnectionDialog
 from MetaSearch.dialogs.recorddialog import RecordDialog
+from MetaSearch.dialogs.recorddialog2 import RecordDialog2
 from MetaSearch.dialogs.xmldialog import XMLDialog
 from MetaSearch.util import (get_connections_from_file, get_ui_class,
                              highlight_xml, normalize_text, open_url,
@@ -114,7 +115,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Search tab
         self.treeRecords.itemSelectionChanged.connect(self.record_clicked)
-        self.treeRecords.itemDoubleClicked.connect(self.show_metadata)
+        self.treeRecords.itemDoubleClicked.connect(self.show_metadata2)
         self.btnSearch.clicked.connect(self.search)
         self.btnSearch.setAutoDefault(False)
         self.leKeywords.returnPressed.connect(self.search)
@@ -940,6 +941,46 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         crd.textMetadata.document().setDefaultStyleSheet(style)
         crd.textMetadata.setHtml(metadata)
         crd.exec_()
+
+    def show_metadata2(self):
+        """show record metadata2"""
+
+        if not self.treeRecords.selectedItems():
+            return
+
+        item = self.treeRecords.currentItem()
+        if not item:
+            return
+
+        identifier = get_item_data(item, 'identifier')
+
+        try:
+            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+            cat = CatalogueServiceWeb(self.catalog_url, timeout=self.timeout)
+            cat.getrecordbyid(
+                [self.catalog.records[identifier].identifier])
+        except ExceptionReport, err:
+            QApplication.restoreOverrideCursor()
+            QMessageBox.warning(self, self.tr('GetRecords error'),
+                                self.tr('Error getting response: %s') % err)
+            return
+
+        QApplication.restoreOverrideCursor()
+
+        record = cat.records[identifier]
+        record.xml_url = cat.request
+
+        crd = RecordDialog2()
+        crd.pteText.setPlainText(record.abstract)
+
+        # metadata = render_template('en', self.context,
+        #                            record, 'record_metadata_dc.html')
+        #
+        # style = QgsApplication.reportStyleSheet()
+        # crd.textMetadata.document().setDefaultStyleSheet(style)
+        # crd.textMetadata.setHtml(metadata)
+        crd.exec_()
+
 
     def show_xml(self):
         """show XML request / response"""
