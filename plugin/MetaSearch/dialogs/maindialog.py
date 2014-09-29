@@ -115,7 +115,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Search tab
         self.treeRecords.itemSelectionChanged.connect(self.record_clicked)
-        self.treeRecords.itemDoubleClicked.connect(self.show_metadata2)
+        self.treeRecords.itemDoubleClicked.connect(self.show_metadata)
         self.btnSearch.clicked.connect(self.search)
         self.btnSearch.setAutoDefault(False)
         self.leKeywords.returnPressed.connect(self.search)
@@ -525,7 +525,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             return  # The first 5 letters of the error message is in the text
 
         if self.rbGeolocationService_Google.isChecked():
-            geolocator = GoogleV3(timeout=4, domain="maps.google.com")
+            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
             geotype = "googlev3"
         elif self.rbGeolocationService_OSM.isChecked():
             geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
@@ -970,8 +970,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         record = cat.records[identifier]
         record.xml_url = cat.request
 
-        crd = RecordDialog2()
-        crd.pteText.setPlainText(record.abstract)
+        # Parsing at recorddialog2.py
+        crd = RecordDialog2(record)
 
         # metadata = render_template('en', self.context,
         #                            record, 'record_metadata_dc.html')

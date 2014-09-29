@@ -27,6 +27,8 @@
 #
 ###############################################################################
 
+import webbrowser
+
 from PyQt4.QtGui import QDialog
 
 from MetaSearch.util import get_ui_class
@@ -36,11 +38,40 @@ BASE_CLASS = get_ui_class('recorddialog2.ui')
 
 class RecordDialog2(QDialog, BASE_CLASS):
     """Record Metadata Dialogue"""
-    def __init__(self, ):
-        """init"""
+    def __init__(self, record):
+        """
+        :param record: <class 'owslib.csw.CswRecord'>
+        """
 
         QDialog.__init__(self)
         self.setupUi(self)
+        self.path = None
 
-    def setItems(self):
-        pass
+        self.pteText.setPlainText(record.abstract)
+        self.leTitle.setText(str(type(record)))
+        self.tbOpenLocation.clicked.connect(self.openfilelocation)
+
+        self.manageGui()
+
+    def manageGui(self):
+        """Manage gui"""
+
+
+
+    def openfilelocation(self):
+        """ Opens file location in native folder browser  """
+
+        # http://stackoverflow.com/questions/6631299/python-opening-a-folder-in-explorer-nautilus-mac-thingie
+        path = self.path
+        # DEV: DELETE
+        path = r"C:/"
+        webbrowser.open(path)
+        # if sys.platform == 'darwin':
+        #     def openFolder(path):
+        #         subprocess.check_call(['open', '--', path])
+        # elif sys.platform == 'linux2':
+        #     def openFolder(path):
+        #         subprocess.check_call(['gnome-open', '--', path])
+        # elif sys.platform == 'win32':
+        #     def openFolder(path):
+        #         subprocess.check_call(['explorer', path])
