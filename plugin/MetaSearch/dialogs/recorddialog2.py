@@ -27,11 +27,11 @@
 #
 ###############################################################################
 
-import webbrowser
+from dateutil.parser import  parse
 
-from PyQt4.QtGui import QDialog
+from PyQt4.QtGui import QDialog, QPixmap
 
-from MetaSearch.util import get_ui_class
+from MetaSearch.util import get_ui_class, open_url, ROI, get_resource
 
 BASE_CLASS = get_ui_class('recorddialog2.ui')
 
@@ -43,35 +43,49 @@ class RecordDialog2(QDialog, BASE_CLASS):
         :param record: <class 'owslib.csw.CswRecord'>
         """
 
-        QDialog.__init__(self)
+        #QDialog.__init__(self)
+        super(RecordDialog2, self).__init__()
+        self.record = record
+        self.roi = ROI(self.record, self)
         self.setupUi(self)
-        self.path = None
-
-        self.pteText.setPlainText(record.abstract)
-        self.leTitle.setText(str(type(record)))
+        self.path = self.roi.local_folder
         self.tbOpenLocation.clicked.connect(self.openfilelocation)
+
+        self.pixmap = QPixmap(get_resource("NoImage.png"))
+        self.lblThumbnail.setPixmap(self.pixmap)
+
+        self.uris = [uri for uri in self.record.uris]
+        self.referenses = [reference for reference in self.record.references]
 
         self.manageGui()
 
     def manageGui(self):
         """Manage gui"""
 
+        if self.path is not None:
+            self.lePath.setText(str(self.path))
+
+        self.pteText.setPlainText(self.record.abstract)
+        self.leTitle.setText(self.record.title)
+        for i in self.uris:
+            self.pteText.appendPlainText(str(i)+"\n")
+        for i in self.referenses:
+            self.pteText.appendPlainText(str(i)+"\n")
+        self.pteText.appendPlainText(self.record.created)
+        self.pteText.appendPlainText(self.record.modified)
+        self.pteText.appendPlainText(self.record.date)
+        self.set_lblDate()
+
+
+    def set_lblDate(self):
+        date = parse(self.record.date)
+        self.lblDate.setText("%s/%s/%s %s:%s" % (date.day, date.month, date.year, date.hour, date.minute))
 
 
     def openfilelocation(self):
         """ Opens file location in native folder browser  """
 
         # http://stackoverflow.com/questions/6631299/python-opening-a-folder-in-explorer-nautilus-mac-thingie
+        # TODO: take the file path from lePath
         path = self.path
-        # DEV: DELETE
-        path = r"C:/"
-        webbrowser.open(path)
-        # if sys.platform == 'darwin':
-        #     def openFolder(path):
-        #         subprocess.check_call(['open', '--', path])
-        # elif sys.platform == 'linux2':
-        #     def openFolder(path):
-        #         subprocess.check_call(['gnome-open', '--', path])
-        # elif sys.platform == 'win32':
-        #     def openFolder(path):
-        #         subprocess.check_call(['explorer', path])
+        open_url(path)

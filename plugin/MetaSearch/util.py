@@ -31,11 +31,13 @@ import os
 import webbrowser
 from xml.dom.minidom import parseString
 import xml.etree.ElementTree as etree
+import datetime
 
 from jinja2 import Environment, FileSystemLoader
 from pygments import highlight
 from pygments.lexers import XmlLexer
 from pygments.formatters import HtmlFormatter
+from PyQt4.QtCore import QObject
 from PyQt4.QtGui import QMessageBox
 from PyQt4.uic import loadUiType
 
@@ -124,6 +126,7 @@ def highlight_xml(context, xml):
 def open_url(url):
     """open URL in web browser"""
 
+    # also if local file opens windows-file-explorer/nautilus/mac-thingie
     webbrowser.open(url)
 
 
@@ -131,3 +134,58 @@ def normalize_text(text):
     """tidy up string"""
 
     return text.replace('\n', '')
+
+
+def get_resource(name):
+    """Returns the filename of a resource"""
+
+    cwd = os.path.dirname(__file__)
+    resource_folder = os.path.join(cwd, "resources")
+    mfile = os.path.join(resource_folder, name)
+    if os.path.isfile(mfile):
+        return mfile
+    return None
+
+
+class ROI(QObject):
+    """Convenient holder for accessing R(ecord) Of Interest information """
+
+    def __init__(self, record, qobject=None):
+        """
+
+        :param record: owslib.csw.CswRecord
+        :param pQObject: pQObject
+        :return: ROI class
+        """
+
+        QObject.__init__(self, qobject)
+        self.record = record
+        self.uris = [uri for uri in self.record.uris]
+        self.referenses = [reference for reference in self.record.references]
+
+    @property
+    def date_created(self):
+        # date = self.record.date
+        return 0
+
+    @property
+    def local_folder(self):
+        """
+        Returns a string representing the path a uri points to.
+        If more than one paths in the dictionary, returns list of paths
+
+        :return: string or [string]
+        """
+        paths = []
+        for e in self.uris:
+            # print (os.path.dirname(e['url']).replace(os.sep, "/")), os.path.isdir(os.path.dirname(e['url'].replace(os.sep,"/")))
+            if os.path.isdir(os.path.dirname(e['url'].replace(os.sep, "/"))):
+                paths.append(os.path.dirname(e['url']))
+        if len(paths) == 0:
+            return None
+        if len(paths) < 2:
+            print os.path.normpath(paths[0])
+            return os.path.normpath(paths[0])
+        else:
+            print paths
+            return [os.path.normpath(path) for path in paths]

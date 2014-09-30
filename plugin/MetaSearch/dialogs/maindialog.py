@@ -115,7 +115,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Search tab
         self.treeRecords.itemSelectionChanged.connect(self.record_clicked)
-        self.treeRecords.itemDoubleClicked.connect(self.show_metadata)
+        self.treeRecords.itemDoubleClicked.connect(self.show_metadata2)
         self.btnSearch.clicked.connect(self.search)
         self.btnSearch.setAutoDefault(False)
         self.leKeywords.returnPressed.connect(self.search)

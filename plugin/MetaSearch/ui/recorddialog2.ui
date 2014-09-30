@@ -102,23 +102,7 @@
     <string>Abstract</string>
    </property>
   </widget>
-  <widget class="QFrame" name="frame">
-   <property name="geometry">
-    <rect>
-     <x>410</x>
-     <y>40</y>
-     <width>181</width>
-     <height>141</height>
-    </rect>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="lineEdit_2">
+  <widget class="QLineEdit" name="lePath">
    <property name="geometry">
     <rect>
      <x>70</x>
@@ -157,11 +141,33 @@
     <cstring>tbOpenLocation</cstring>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="lblThumbnail">
+   <property name="geometry">
+    <rect>
+     <x>390</x>
+     <y>30</y>
+     <width>191</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
      <x>370</x>
-     <y>200</y>
+     <y>230</y>
      <width>91</width>
      <height>16</height>
     </rect>
@@ -174,10 +180,16 @@
    <property name="geometry">
     <rect>
      <x>470</x>
-     <y>200</y>
+     <y>230</y>
      <width>91</width>
      <height>16</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="text">
     <string>MOCK_DATE</string>
