@@ -971,14 +971,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         record.xml_url = cat.request
 
         # Parsing at recorddialog2.py
-        crd = RecordDialog2(record)
-
-        # metadata = render_template('en', self.context,
-        #                            record, 'record_metadata_dc.html')
-        #
-        # style = QgsApplication.reportStyleSheet()
-        # crd.textMetadata.document().setDefaultStyleSheet(style)
-        # crd.textMetadata.setHtml(metadata)
+        crd = RecordDialog2(record=record, iface=self.iface)
         crd.exec_()
 
 

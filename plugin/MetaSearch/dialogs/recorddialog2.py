@@ -27,9 +27,11 @@
 #
 ###############################################################################
 
-from dateutil.parser import  parse
+from dateutil.parser import parse
+from subprocess import check_call
 
 from PyQt4.QtGui import QDialog, QPixmap
+from PyQt4.QtCore import Qt
 
 from MetaSearch.util import get_ui_class, open_url, ROI, get_resource
 
@@ -38,21 +40,23 @@ BASE_CLASS = get_ui_class('recorddialog2.ui')
 
 class RecordDialog2(QDialog, BASE_CLASS):
     """Record Metadata Dialogue"""
-    def __init__(self, record):
+    def __init__(self, record, iface):
         """
         :param record: <class 'owslib.csw.CswRecord'>
         """
 
         #QDialog.__init__(self)
         super(RecordDialog2, self).__init__()
+        self.setupUi(self)
+        self.iface = iface
         self.record = record
         self.roi = ROI(self.record, self)
-        self.setupUi(self)
-        self.path = self.roi.local_folder
+        self.thumbnail = self.roi.get_thumbnail
+        self.path = self.roi.local_folder_path
         self.tbOpenLocation.clicked.connect(self.openfilelocation)
-
         self.pixmap = QPixmap(get_resource("NoImage.png"))
         self.lblThumbnail.setPixmap(self.pixmap)
+        self.btnAddWNSLayer.clicked.connect(self.create_wms_xml)
 
         self.uris = [uri for uri in self.record.uris]
         self.referenses = [reference for reference in self.record.references]
@@ -63,29 +67,41 @@ class RecordDialog2(QDialog, BASE_CLASS):
         """Manage gui"""
 
         if self.path is not None:
-            self.lePath.setText(str(self.path))
+            self.lePath.setText(str(self.path[0]))
+            if len(self.path) > 1:  # More than one option
+                # TODO: Add QCompleter
+                pass
+        else:
+            self.tbOpenLocation.setEnabled(False)
 
         self.pteText.setPlainText(self.record.abstract)
         self.leTitle.setText(self.record.title)
+        # dev stuff:
         for i in self.uris:
             self.pteText.appendPlainText(str(i)+"\n")
         for i in self.referenses:
             self.pteText.appendPlainText(str(i)+"\n")
-        self.pteText.appendPlainText(self.record.created)
-        self.pteText.appendPlainText(self.record.modified)
         self.pteText.appendPlainText(self.record.date)
-        self.set_lblDate()
+        if self.pixmap.load(self.thumbnail[0], self.thumbnail[1]):
+            self.pixmap.scaled(self.lblThumbnail.maximumWidth(),
+                               self.lblThumbnail.maximumHeight(),
+                               Qt.KeepAspectRatio)
+            self.lblThumbnail.setPixmap(self.pixmap)
 
+        self.set_lblDate()
 
     def set_lblDate(self):
         date = parse(self.record.date)
-        self.lblDate.setText("%s/%s/%s %s:%s" % (date.day, date.month, date.year, date.hour, date.minute))
-
+        intro = self.tr("Last Modified:")
+        strdate = "%s/%s/%s %s:%s" % (date.day, date.month, date.year,
+                                      date.hour, date.minute)
+        self.lblDate.setText(" ".join([intro, strdate]))
 
     def openfilelocation(self):
         """ Opens file location in native folder browser  """
 
-        # http://stackoverflow.com/questions/6631299/python-opening-a-folder-in-explorer-nautilus-mac-thingie
-        # TODO: take the file path from lePath
-        path = self.path
+        path = self.lePath.text()
         open_url(path)
+
+    def create_wms_xml(self):
+        p = check_call(["gdalinfo", "--version"])

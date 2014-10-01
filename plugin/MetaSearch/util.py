@@ -31,7 +31,7 @@ import os
 import webbrowser
 from xml.dom.minidom import parseString
 import xml.etree.ElementTree as etree
-import datetime
+from urllib import urlretrieve
 
 from jinja2 import Environment, FileSystemLoader
 from pygments import highlight
@@ -126,7 +126,6 @@ def highlight_xml(context, xml):
 def open_url(url):
     """open URL in web browser"""
 
-    # also if local file opens windows-file-explorer/nautilus/mac-thingie
     webbrowser.open(url)
 
 
@@ -146,6 +145,11 @@ def get_resource(name):
         return mfile
     return None
 
+
+def createqgisgroup(iface, groupname,position=-1):
+    """Add a laeyer group in Qgis"""
+
+    iface.legendInterface().addGroup(groupname, position)
 
 class ROI(QObject):
     """Convenient holder for accessing R(ecord) Of Interest information """
@@ -169,7 +173,7 @@ class ROI(QObject):
         return 0
 
     @property
-    def local_folder(self):
+    def local_folder_path(self):
         """
         Returns a string representing the path a uri points to.
         If more than one paths in the dictionary, returns list of paths
@@ -178,14 +182,37 @@ class ROI(QObject):
         """
         paths = []
         for e in self.uris:
-            # print (os.path.dirname(e['url']).replace(os.sep, "/")), os.path.isdir(os.path.dirname(e['url'].replace(os.sep,"/")))
-            if os.path.isdir(os.path.dirname(e['url'].replace(os.sep, "/"))):
+            if os.path.isdir(
+                    os.path.dirname(e['url'].replace(os.sep, "/"))):
                 paths.append(os.path.dirname(e['url']))
         if len(paths) == 0:
             return None
-        if len(paths) < 2:
-            print os.path.normpath(paths[0])
-            return os.path.normpath(paths[0])
         else:
-            print paths
             return [os.path.normpath(path) for path in paths]
+
+    @property
+    def get_thumbnail(self):
+        """ Return the bigest size thumbnail and format """
+
+        # (filename, format)
+
+        candidates = self.thumbnails()
+        result = (0,)
+        if len(candidates) > 0:
+            for k in candidates.iterkeys():
+                if os.path.getsize(candidates[k][0]) > result[0]:
+                    result = (candidates[k][0],candidates[k][1].split("/")[1])
+                    return result
+        return None
+
+    def thumbnails(self):
+        """Get a List of possible thumbnails"""
+        candidates = {}
+        for e in self.uris:
+            if "thumbnail" in e['name'] :
+                candidates[e['name']] = e['url']
+        for k in candidates.iterkeys():
+            f, t = urlretrieve(candidates[k])
+            candidates[k] = f, t['content-type']
+
+        return candidates
