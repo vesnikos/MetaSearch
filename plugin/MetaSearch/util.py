@@ -178,12 +178,14 @@ class ROI(QObject):
         Returns a string representing the path a uri points to.
         If more than one paths in the dictionary, returns list of paths
 
-        :return: string or [string]
+        :return: None if no valid path found, [string] for path(s)
         """
+
         paths = []
         for e in self.uris:
-            if os.path.isdir(
-                    os.path.dirname(e['url'].replace(os.sep, "/"))):
+            if os.path.isdir(os.path.dirname(e['url'].replace(os.sep, "/"))):
+                paths.append((e['url']))
+            if os.path.isfile(os.path.dirname(e['url'].replace(os.sep, "/"))):
                 paths.append(os.path.dirname(e['url']))
         if len(paths) == 0:
             return None
@@ -209,7 +211,7 @@ class ROI(QObject):
         """Get a List of possible thumbnails"""
         candidates = {}
         for e in self.uris:
-            if "thumbnail" in e['name'] :
+            if "thumbnail" in e['name']:
                 candidates[e['name']] = e['url']
         for k in candidates.iterkeys():
             f, t = urlretrieve(candidates[k])

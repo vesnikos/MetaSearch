@@ -135,7 +135,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>F&amp;ile</string>
+    <string>F&amp;older :</string>
    </property>
    <property name="buddy">
     <cstring>tbOpenLocation</cstring>

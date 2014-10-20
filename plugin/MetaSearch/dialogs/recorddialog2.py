@@ -35,15 +35,23 @@ from PyQt4.QtCore import Qt
 
 from MetaSearch.util import get_ui_class, open_url, ROI, get_resource
 
+_debug = False
+
 BASE_CLASS = get_ui_class('recorddialog2.ui')
 
 
 class RecordDialog2(QDialog, BASE_CLASS):
     """Record Metadata Dialogue"""
+
+
     def __init__(self, record, iface):
         """
+        :param iface: Qgis Interface
         :param record: <class 'owslib.csw.CswRecord'>
         """
+
+        #adhoc encoding
+        self._charEncoding = "cp1253"
 
         #QDialog.__init__(self)
         super(RecordDialog2, self).__init__()
@@ -58,7 +66,11 @@ class RecordDialog2(QDialog, BASE_CLASS):
         self.lblThumbnail.setPixmap(self.pixmap)
         self.btnAddWNSLayer.clicked.connect(self.create_wms_xml)
 
+        # Keyword List
+        self.keywords = [kw for kw in self.record.subjects]
+        # URI List
         self.uris = [uri for uri in self.record.uris]
+        # Referense List
         self.referenses = [reference for reference in self.record.references]
 
         self.manageGui()
@@ -66,8 +78,12 @@ class RecordDialog2(QDialog, BASE_CLASS):
     def manageGui(self):
         """Manage gui"""
 
+        # Add WMS Layer : Disable for now
+        self.btnAddWNSLayer.setEnabled(False)
+
+
         if self.path is not None:
-            self.lePath.setText(str(self.path[0]))
+            self.lePath.setText(self.path[0])
             if len(self.path) > 1:  # More than one option
                 # TODO: Add QCompleter
                 pass
@@ -76,17 +92,26 @@ class RecordDialog2(QDialog, BASE_CLASS):
 
         self.pteText.setPlainText(self.record.abstract)
         self.leTitle.setText(self.record.title)
-        # dev stuff:
-        for i in self.uris:
-            self.pteText.appendPlainText(str(i)+"\n")
-        for i in self.referenses:
-            self.pteText.appendPlainText(str(i)+"\n")
-        self.pteText.appendPlainText(self.record.date)
-        if self.pixmap.load(self.thumbnail[0], self.thumbnail[1]):
-            self.pixmap.scaled(self.lblThumbnail.maximumWidth(),
-                               self.lblThumbnail.maximumHeight(),
-                               Qt.KeepAspectRatio)
-            self.lblThumbnail.setPixmap(self.pixmap)
+        if _debug:
+            for i in self.uris:
+                self.pteText.appendPlainText(str(i)+"\n")
+            for i in self.referenses:
+                self.pteText.appendPlainText(str(i)+"\n")
+            self.pteText.appendPlainText(self.record.date)
+            for i in self.keywords:
+                self.pteText.appendPlainText(i)
+
+        # FIXME: Unreachable network path
+        try:
+            if self.pixmap.load(self.thumbnail[0], self.thumbnail[1]):
+                self.pixmap.scaled(self.lblThumbnail.maximumWidth(),
+                                   self.lblThumbnail.maximumHeight(),
+                                   Qt.KeepAspectRatio)
+                self.lblThumbnail.setPixmap(self.pixmap)
+        except TypeError:
+            # self.pixmap = QPixmap(get_resource("NoImage.png"))
+            # self.lblThumbnail.setPixmap(self.pixmap)
+            pass
 
         self.set_lblDate()
 
@@ -99,7 +124,6 @@ class RecordDialog2(QDialog, BASE_CLASS):
 
     def openfilelocation(self):
         """ Opens file location in native folder browser  """
-
         path = self.lePath.text()
         open_url(path)
 
