@@ -2,7 +2,7 @@
 ###############################################################################
 #
 # Copyright (C) 2010 NextGIS (http://nextgis.org),
-#                    Alexander Bruy (alexander.bruy@gmail.com),
+# Alexander Bruy (alexander.bruy@gmail.com),
 #                    Maxim Dubinin (sim@gis-lab.info)
 #
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
@@ -146,10 +146,11 @@ def get_resource(name):
     return None
 
 
-def createqgisgroup(iface, groupname,position=-1):
+def createqgisgroup(iface, groupname, position=-1):
     """Add a laeyer group in Qgis"""
 
     iface.legendInterface().addGroup(groupname, position)
+
 
 class ROI(QObject):
     """Convenient holder for accessing R(ecord) Of Interest information """
@@ -203,7 +204,7 @@ class ROI(QObject):
         if len(candidates) > 0:
             for k in candidates.iterkeys():
                 if os.path.getsize(candidates[k][0]) > result[0]:
-                    result = (candidates[k][0],candidates[k][1].split("/")[1])
+                    result = (candidates[k][0], candidates[k][1].split("/")[1])
                     return result
         return None
 

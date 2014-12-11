@@ -7,7 +7,7 @@
             body, h3 {
                 background-color: #ffffff;
                 font-family: arial, verdana, sans-serif;
-                text-align: left;
+                text-align: right;
                 float: left;
             }
             header {
@@ -79,7 +79,15 @@
             <h4>Links</h4>
             <ul>
             {% for link in obj.references %}
-                <li><a href="{{ link['url'] }}">{{ link['scheme'] if link['scheme'] not in [None, 'None', ''] else gettext('Access Link') }}</a></li>
+                <!--#  Duct tape programing:
+                1) Filtered for only shapes
+                2) replacing utf8 with iso 8859 7 encoding
+                original can be found at
+                https://github.com/geopython/MetaSearch/blob/master/plugin/MetaSearch/resources/templates/record_metadata_dc.html#L82
+                -->
+                {% if 'SHAPE' in link['url'] %}
+                    <li><a href="{{ link['url']|replace('UTF-8','ISO-8859-7') }}">Download Shapefile</a></li>
+                {% endif %}
             {% endfor %}
             {% for link in obj.uris %}
                 <li><a href="{{ link['url'] }}">{{ link['protocol'] if link['protocol'] not in [None, 'None', ''] else gettext('Access Link') }}</a></li>

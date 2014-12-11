@@ -61,8 +61,8 @@ from MetaSearch.util import (get_connections_from_file, get_ui_class,
                              render_template, StaticContext)
 
 
-from geopy.geocoders import Nominatim, GoogleV3
-from geopy.exc import (GeopyError, GeocoderQuotaExceeded,
+from geopy_ga.geocoders import Nominatim, GoogleV3
+from geopy_ga.exc import (GeopyError, GeocoderQuotaExceeded,
                        GeocoderUnavailable, GeocoderTimedOut)
 
 
@@ -115,7 +115,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Search tab
         self.treeRecords.itemSelectionChanged.connect(self.record_clicked)
-        self.treeRecords.itemDoubleClicked.connect(self.show_metadata2)
+        self.treeRecords.itemDoubleClicked.connect(self.show_metadata)
         self.btnSearch.clicked.connect(self.search)
         self.btnSearch.setAutoDefault(False)
         self.leKeywords.returnPressed.connect(self.search)
@@ -385,7 +385,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     # Search tab
 
-    # def draw_search_footprint(self):
+    def draw_search_footprint(self):
+            pass
     #     """Draw BBox visualising the Search extension"""
     #     # TODO figure how to call; also i think there's a bug in the code
     #
@@ -489,7 +490,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             maxx, maxy = maxxy
 
         else:  # 4326
-
             minx = bbox[0]
             maxy = bbox[1]
             maxx = bbox[2]
@@ -548,7 +548,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         if self.rbGeolocationService_Google.isChecked():
             # List of google domains:
             # http://en.wikipedia.org/wiki/List_of_Google_domains
-            geolocator = GoogleV3(timeout=4, domain="maps.google.com")
+            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
             geotype = "googlev3"
 
         elif self.rbGeolocationService_OSM.isChecked():
@@ -613,7 +613,14 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         miny = self.leSouth.text()
         maxx = self.leEast.text()
         maxy = self.leNorth.text()
-        bbox = [minx, miny, maxx, maxy]
+
+        # Hack for Geonode
+        # Geonodes CSW seems to expect y/x coords,
+        # MetaSearch provides at x,y so "Find by BBox" is no go
+        #
+        # Replace the following to go back to previous functionality
+        # bbox = [minx, miny, maxx, maxy]
+        bbox = [miny, minx, maxy, maxy]
 
         # only apply spatial filter if bbox is not global
         # even for a global bbox, if a spatial filter is applied, then
