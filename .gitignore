@@ -15,5 +15,5 @@ MetaSearch.pro
 # ui .py files built dynamically
 plugin/MetaSearch/ui/*.py
 
-
+*.zip
 docs/_build

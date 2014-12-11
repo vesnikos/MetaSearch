@@ -6,8 +6,8 @@
 # QGIS Catalogue Service client.
 #
 # Copyright (C) 2010 NextGIS (http://nextgis.org),
-#                    Alexander Bruy (alexander.bruy@gmail.com),
-#                    Maxim Dubinin (sim@gis-lab.info)
+# Alexander Bruy (alexander.bruy@gmail.com),
+# Maxim Dubinin (sim@gis-lab.info)
 #
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
 #
@@ -60,10 +60,11 @@ from MetaSearch.util import (get_connections_from_file, get_ui_class,
                              highlight_xml, normalize_text, open_url,
                              render_template, StaticContext)
 
-
 from geopy_ga.geocoders import Nominatim, GoogleV3
 from geopy_ga.exc import (GeopyError, GeocoderQuotaExceeded,
-                       GeocoderUnavailable, GeocoderTimedOut)
+                          GeocoderUnavailable, GeocoderTimedOut)
+
+import psycopg2
 
 
 BASE_CLASS = get_ui_class('maindialog.ui')
@@ -71,6 +72,7 @@ BASE_CLASS = get_ui_class('maindialog.ui')
 
 class MetaSearchDialog(QDialog, BASE_CLASS):
     """main dialogue"""
+
     def __init__(self, iface):
         """init window"""
 
@@ -116,9 +118,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # Search tab
         self.treeRecords.itemSelectionChanged.connect(self.record_clicked)
         self.treeRecords.itemDoubleClicked.connect(self.show_metadata)
-        self.btnSearch.clicked.connect(self.search)
+        self.btnSearch.clicked.connect(self.search2)
         self.btnSearch.setAutoDefault(False)
-        self.leKeywords.returnPressed.connect(self.search)
+        self.leKeywords.returnPressed.connect(self.search2)
         # Prevent dialog from closing upon pressing enter
         self.buttonBox.button(QDialogButtonBox.Close).setAutoDefault(False)
         # launch help from button
@@ -386,7 +388,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     # Search tab
 
     def draw_search_footprint(self):
-            pass
+        pass
+
     #     """Draw BBox visualising the Search extension"""
     #     # TODO figure how to call; also i think there's a bug in the code
     #
@@ -423,11 +426,11 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         for l in self.map.layers():
             self.LayerDic[l.id()] = l.name(), \
-                [l.extent().xMinimum(),
-                 l.extent().yMaximum(),
-                 l.extent().xMaximum(),
-                 l.extent().yMinimum()], \
-                int(l.crs().authid().split(":")[1])
+                                    [l.extent().xMinimum(),
+                                     l.extent().yMaximum(),
+                                     l.extent().xMaximum(),
+                                     l.extent().yMinimum()], \
+                                    int(l.crs().authid().split(":")[1])
 
         self.cmbLayerList.setEnabled(True)
         if len(self.LayerDic) < 1:
@@ -578,6 +581,83 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWhere.setText(self._geolocator_errors[2])
             self.set_bbox_global()
 
+    def search2(self):
+        self.catalog = None
+        self.constraints = []
+        if self.leWhere.text() != "":
+            self.set_bbox_from_r_geocode()
+
+        # clear all fields and disable buttons
+        self.lblResults.clear()
+        self.treeRecords.clear()
+
+        self.reset_buttons()
+
+        # save some settings
+        self.settings.setValue('/MetaSearch/returnRecords',
+                               self.spnRecords.cleanText())
+
+        # set current catalogue
+        current_text = self.cmbConnectionsSearch.currentText()
+        key = '/MetaSearch/%s' % current_text
+        self.catalog_url = self.settings.value('%s/url' % key)
+
+        # start position and number of records to return
+        self.startfrom = 0
+        self.maxrecords = self.spnRecords.value()
+
+        # set timeout
+        self.timeout = self.spnTimeout.value()
+
+        # bbox
+        minx = self.leWest.text()
+        miny = self.leSouth.text()
+        maxx = self.leEast.text()
+        maxy = self.leNorth.text()
+
+        conn = psycopg2.connect(database='geonode', host='10.0.31.43', port='5432', user='nikos', password='xwing')
+        WKTbbox = 'POLYGON(({0} {1}, {0} {3}, {2} {3}, {2} {1}, {0} {1}  ))'.format(minx, miny, maxx, maxy)
+        print WKTbbox
+
+        cur = conn.cursor()
+        cur.execute("""
+          SELECT  uuid from boundaries_test where st_intersects(geom, ST_SetSRID (ST_GeomFromText('{0}'),4326));
+           """.format(WKTbbox)
+        )
+        uuids = []
+        for r in cur:
+            uuids.append(r[0])
+
+        # build request
+        if not self._get_csw():
+            return
+
+        # TODO: allow users to select resources types
+        # to find ('service', 'dataset', etc.)
+        print uuids
+        try:
+            self.catalog.getrecordbyid(id=uuids)
+
+        except ExceptionReport, err:
+            QApplication.restoreOverrideCursor()
+            QMessageBox.warning(self, self.tr('Search error'),
+                                self.tr('Search error: %s') % err)
+            return
+        except Exception, err:
+            QApplication.restoreOverrideCursor()
+            QMessageBox.warning(self, self.tr('Connection error'),
+                                self.tr('Connection error: %s') % err)
+            return
+
+        if len(self.catalog.records) == 0:
+            QApplication.restoreOverrideCursor()
+            self.lblResults.setText(self.tr('0 results'))
+            return
+
+        QApplication.restoreOverrideCursor()
+        self.display_results()
+
+
     def search(self):
         """execute search"""
 
@@ -670,12 +750,18 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.treeRecords.clear()
 
-        position = self.catalog.results['returned'] + self.startfrom
+        # HACK
+        # position = self.catalog.results['returned'] + self.startfrom
+        position = len(self.catalog.records) + self.startfrom
 
+        # msg = self.tr('Showing %d - %d of %d result%s') % \
+        #              (self.startfrom + 1, position,
+        #               self.catalog.results['matches'],
+        #               's'[self.catalog.results['matches'] == 1:])
         msg = self.tr('Showing %d - %d of %d result%s') % \
-                     (self.startfrom + 1, position,
-                      self.catalog.results['matches'],
-                      's'[self.catalog.results['matches'] == 1:])
+              (self.startfrom + 1, position,
+               len(self.catalog.records),
+               's'[len(self.catalog.records) == 1:])
 
         self.lblResults.setText(msg)
 
@@ -694,7 +780,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.btnShowXml.setEnabled(True)
 
-        if self.catalog.results["matches"] < self.maxrecords:
+        #Hack
+        # if self.catalog.results["matches"] < self.maxrecords:
+        if len(self.catalog.records) < self.maxrecords:
             disabled = False
         else:
             disabled = True
@@ -767,7 +855,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             # interactive link types, then set
             if all([link_type is not None,
                     link_type in wmswmst_link_types + wfs_link_types +
-                    wcs_link_types]):
+                            wcs_link_types]):
                 if link_type in wmswmst_link_types:
                     services['wms'] = link['url']
                     self.btnAddToWms.setEnabled(True)
@@ -1025,6 +1113,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         QDialog.reject(self)
         self.rubber_band.reset()
 
+
     def _get_csw(self):
         """convenience function to init owslib.csw.CatalogueServiceWeb"""
 
@@ -1138,10 +1227,10 @@ def bbox_to_polygon(bbox):
         maxy = float(bbox.maxy)
 
         return [[
-            QgsPoint(minx, miny),
-            QgsPoint(minx, maxy),
-            QgsPoint(maxx, maxy),
-            QgsPoint(maxx, miny)
-        ]]
+                    QgsPoint(minx, miny),
+                    QgsPoint(minx, maxy),
+                    QgsPoint(maxx, maxy),
+                    QgsPoint(maxx, miny)
+                ]]
     else:
         return None
