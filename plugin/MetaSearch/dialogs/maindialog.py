@@ -33,7 +33,7 @@ from urllib2 import build_opener, install_opener, ProxyHandler
 
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
-                       QgsProviderRegistry)
+                       QgsProviderRegistry, QgsRectangle)
 
 from qgis.gui import QgsRubberBand
 
@@ -390,7 +390,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def draw_search_footprint(self):
         pass
 
-    #     """Draw BBox visualising the Search extension"""
+    # """Draw BBox visualising the Search extension"""
     #     # TODO figure how to call; also i think there's a bug in the code
     #
     #     # if the record has a bbox, show a footprint on the map
@@ -619,6 +619,20 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         WKTbbox = 'POLYGON(({0} {1}, {0} {3}, {2} {3}, {2} {1}, {0} {1}  ))'.format(minx, miny, maxx, maxy)
         print WKTbbox
 
+        # move to bbox
+        # TODO: Refactor
+
+        src = QgsCoordinateReferenceSystem(4326)
+        dst = self.map.mapRenderer().destinationCrs()
+        p1, p2 = QgsPoint(float(minx), float(miny)), QgsPoint(float(maxx), float(maxy))
+        xform = QgsCoordinateTransform(src, dst)
+        p1 = xform.transform(p1)
+        p2 = xform.transform(p2)
+        rect = QgsRectangle(p1, p2)
+        self.iface.mapCanvas().setExtent(rect)
+        self.iface.mapCanvas().refresh()
+
+
         cur = conn.cursor()
         cur.execute("""
           SELECT  uuid from boundaries_test where st_intersects(geom, ST_SetSRID (ST_GeomFromText('{0}'),4326));
@@ -627,6 +641,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         uuids = []
         for r in cur:
             uuids.append(r[0])
+        if len(uuids) == 0:
+            return
 
         # build request
         if not self._get_csw():
@@ -634,6 +650,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # TODO: allow users to select resources types
         # to find ('service', 'dataset', etc.)
+        # TODO Clean up
         print uuids
         try:
             self.catalog.getrecordbyid(id=uuids)
@@ -641,7 +658,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         except ExceptionReport, err:
             QApplication.restoreOverrideCursor()
             QMessageBox.warning(self, self.tr('Search error'),
-                                self.tr('Search error: %s') % err)
+                                self.tr('Search error2: %s') % err)
             return
         except Exception, err:
             QApplication.restoreOverrideCursor()
