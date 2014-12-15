@@ -391,9 +391,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         pass
 
     # """Draw BBox visualising the Search extension"""
-    #     # TODO figure how to call; also i think there's a bug in the code
+    # # TODO figure how to call; also i think there's a bug in the code
     #
-    #     # if the record has a bbox, show a footprint on the map
+    # # if the record has a bbox, show a footprint on the map
     #     # ul,ur,lr,ll
     #     points = [
     #         [QgsPoint(float(self.leNorth.text()), float(self.leWest.text())),
@@ -590,6 +590,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # clear all fields and disable buttons
         self.lblResults.clear()
         self.treeRecords.clear()
+        self.treeRecords.sortItems(1, Qt.AscendingOrder)
 
         self.reset_buttons()
 
@@ -615,23 +616,25 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         maxx = self.leEast.text()
         maxy = self.leNorth.text()
 
+        # FIXME: CRITICAL: NO-HARDCODE PASSWORDS
         conn = psycopg2.connect(database='geonode', host='10.0.31.43', port='5432', user='nikos', password='xwing')
         WKTbbox = 'POLYGON(({0} {1}, {0} {3}, {2} {3}, {2} {1}, {0} {1}  ))'.format(minx, miny, maxx, maxy)
-        print WKTbbox
 
         # move to bbox
         # TODO: Refactor
+        # Its global, no point to move the activeview
 
-        src = QgsCoordinateReferenceSystem(4326)
-        dst = self.map.mapRenderer().destinationCrs()
-        p1, p2 = QgsPoint(float(minx), float(miny)), QgsPoint(float(maxx), float(maxy))
-        xform = QgsCoordinateTransform(src, dst)
-        p1 = xform.transform(p1)
-        p2 = xform.transform(p2)
-        rect = QgsRectangle(p1, p2)
-        self.iface.mapCanvas().setExtent(rect)
-        self.iface.mapCanvas().refresh()
-
+        bbox = [miny, minx, maxy, maxx]
+        if bbox != ['-90', '-180', '90', '180']:
+            src = QgsCoordinateReferenceSystem(4326)
+            dst = self.map.mapRenderer().destinationCrs()
+            p1, p2 = QgsPoint(float(minx), float(miny)), QgsPoint(float(maxx), float(maxy))
+            xform = QgsCoordinateTransform(src, dst)
+            p1 = xform.transform(p1)
+            p2 = xform.transform(p2)
+            rect = QgsRectangle(p1, p2)
+            self.iface.mapCanvas().setExtent(rect)
+            self.iface.mapCanvas().refresh()
 
         cur = conn.cursor()
         cur.execute("""
@@ -651,7 +654,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # TODO: allow users to select resources types
         # to find ('service', 'dataset', etc.)
         # TODO Clean up
-        print uuids
         try:
             self.catalog.getrecordbyid(id=uuids)
 
@@ -888,15 +890,20 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def navigate(self):
         """manage navigation / paging"""
 
+        # TODO: FIXME: list of catalog items to show -> crt a list ctlog items, slice 'n' dice, display
+
         caller = self.sender().objectName()
 
         if caller == 'btnFirst':
             self.startfrom = 0
         elif caller == 'btnLast':
-            self.startfrom = self.catalog.results['matches'] - self.maxrecords
+            # self.startfrom = self.catalog.results['matches'] - self.maxrecords
+            self.startfrom = len(self.catalog.records) - self.maxrecords
         elif caller == 'btnNext':
             self.startfrom += self.maxrecords
-            if self.startfrom >= self.catalog.results["matches"]:
+            # TODO: Cleanup
+            # if self.startfrom >= self.catalog.results["matches"]:
+            if self.startfrom >= len(self.catalog.records):
                 msg = self.tr('End of results. Go to start?')
                 res = QMessageBox.information(self, self.tr('Navigation'),
                                               msg,
@@ -915,7 +922,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
                                               (QMessageBox.Ok |
                                                QMessageBox.Cancel))
                 if res == QMessageBox.Ok:
-                    self.startfrom = (self.catalog.results['matches'] -
+                    # TODO: Cleanup
+                    #  self.startfrom = (self.catalog.results['matches'] -
+                    self.startfrom = (len(self.catalog.records) -
                                       self.maxrecords)
                 else:
                     return
