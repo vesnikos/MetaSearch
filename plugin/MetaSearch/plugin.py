@@ -32,7 +32,7 @@ from PyQt4.QtGui import QAction, QIcon
 from MetaSearch.dialogs.maindialog import MetaSearchDialog
 from MetaSearch.util import StaticContext, open_url
 
-LOGGER = logging.getLogger('MetaSearch')
+LOGGER = logging.getLogger('MetaSearch(Geocode)')
 
 
 class MetaSearchPlugin(object):
@@ -69,7 +69,7 @@ class MetaSearchPlugin(object):
                 raise RuntimeError(msg)
             QCoreApplication.installTranslator(self.translator)
 
-        LOGGER.debug(QCoreApplication.translate('MetaSearch',
+        LOGGER.debug(QCoreApplication.translate('MetaSearch(Geocode)',
                      'Translation loaded: %s' % tr_file))
 
     def initGui(self):
