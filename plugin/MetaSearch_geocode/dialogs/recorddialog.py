@@ -5,6 +5,10 @@
 # ---------------------------------------------------------
 # QGIS Catalogue Service client.
 #
+# Copyright (C) 2010 NextGIS (http://nextgis.org),
+#                    Alexander Bruy (alexander.bruy@gmail.com),
+#                    Maxim Dubinin (sim@gis-lab.info)
+#
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
 #
 # This source is free software; you can redistribute it and/or modify it under
@@ -25,13 +29,13 @@
 
 from PyQt4.QtGui import QDialog
 
-from MetaSearch.util import get_ui_class
+from MetaSearch_geocode.util import get_ui_class
 
-BASE_CLASS = get_ui_class('xmldialog.ui')
+BASE_CLASS = get_ui_class('recorddialog.ui')
 
 
-class XMLDialog(QDialog, BASE_CLASS):
-    """Raw XML Dialogue"""
+class RecordDialog(QDialog, BASE_CLASS):
+    """Record Metadata Dialogue"""
     def __init__(self):
         """init"""
 

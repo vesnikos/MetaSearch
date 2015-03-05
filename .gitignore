@@ -13,7 +13,11 @@ ui_*.py
 MetaSearch.pro
 # plugin/MetaSearch/ext-libs
 # ui .py files built dynamically
-plugin/MetaSearch/ui/*.py
+plugin/MetaSearch_geocode/ui/*.py
 
+.idea
+.tests
+.misc
+.tx
 *.zip
 docs/_build

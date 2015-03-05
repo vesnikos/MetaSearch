@@ -33,7 +33,7 @@ from subprocess import check_call
 from PyQt4.QtGui import QDialog, QPixmap
 from PyQt4.QtCore import Qt
 
-from MetaSearch.util import get_ui_class, open_url, ROI, get_resource
+from MetaSearch_geocode.util import get_ui_class, open_url, ROI, get_resource
 
 _debug = False
 

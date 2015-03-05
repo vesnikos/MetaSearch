@@ -29,8 +29,8 @@ import os
 from PyQt4.QtCore import QCoreApplication, QLocale, QSettings, QTranslator
 from PyQt4.QtGui import QAction, QIcon
 
-from MetaSearch.dialogs.maindialog import MetaSearchDialog
-from MetaSearch.util import StaticContext, open_url
+from MetaSearch_geocode.dialogs.maindialog import MetaSearchDialog
+from MetaSearch_geocode.util import StaticContext, open_url
 
 LOGGER = logging.getLogger('MetaSearch(Geocode)')
 
@@ -45,7 +45,7 @@ class MetaSearchPlugin(object):
         self.action_run = None
         self.action_help = None
         self.dialog = None
-        self.web_menu = '&MetaSearch'
+        self.web_menu = '&MetaSearch(Geocode)'
 
         LOGGER.debug('Setting up i18n')
 
@@ -78,12 +78,12 @@ class MetaSearchPlugin(object):
         # run
         run_icon = QIcon('%s/%s' % (self.context.ppath,
                                     'images/MetaSearch.png'))
-        self.action_run = QAction(run_icon, 'MetaSearch',
+        self.action_run = QAction(run_icon, 'MetaSearch(Geocode)',
                                   self.iface.mainWindow())
-        self.action_run.setWhatsThis(QCoreApplication.translate('MetaSearch',
-                                     'MetaSearch plugin'))
-        self.action_run.setStatusTip(QCoreApplication.translate('MetaSearch',
-                                     'Search Metadata Catalogues'))
+        self.action_run.setWhatsThis(QCoreApplication.translate('MetaSearch(Geocode)',
+                                     'MetaSearch(Geocode) plugin'))
+        self.action_run.setStatusTip(QCoreApplication.translate('MetaSearch(Geocode)',
+                                     'Search MetaSearch(Geocode) Catalogues'))
 
         self.action_run.triggered.connect(self.run)
 
@@ -93,10 +93,10 @@ class MetaSearchPlugin(object):
         # help
         help_icon = QIcon('%s/%s' % (self.context.ppath, 'images/help.png'))
         self.action_help = QAction(help_icon, 'Help', self.iface.mainWindow())
-        self.action_help.setWhatsThis(QCoreApplication.translate('MetaSearch',
-                                      'MetaSearch plugin help'))
-        self.action_help.setStatusTip(QCoreApplication.translate('MetaSearch',
-                                      'Get Help on MetaSearch'))
+        self.action_help.setWhatsThis(QCoreApplication.translate('MetaSearch(Geocode)',
+                                      'MetaSearch(Geocode) plugin help'))
+        self.action_help.setStatusTip(QCoreApplication.translate('MetaSearch(Geocode)',
+                                      'Get Help on MetaSearch(Geocode)'))
         self.action_help.triggered.connect(self.help)
 
         self.iface.addPluginToWebMenu(self.web_menu, self.action_help)
@@ -114,7 +114,7 @@ class MetaSearchPlugin(object):
 
     def run(self):
         """open MetaSearch"""
-
+        print(os.path.dirname(__file__))
         self.dialog.show()
 
     def help(self):

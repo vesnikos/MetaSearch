@@ -39,7 +39,7 @@ from pygments.formatters import HtmlFormatter
 from PyQt4.QtGui import QMessageBox
 from PyQt4.uic import loadUiType
 
-LOGGER = logging.getLogger('MetaSearch')
+LOGGER = logging.getLogger('MetaSearch(Geocode)')
 
 
 class StaticContext(object):

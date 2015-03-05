@@ -34,7 +34,7 @@ from urllib2 import build_opener, install_opener, ProxyHandler
 from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT
 from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
                          QDialogButtonBox, QMessageBox, QTreeWidgetItem,
-                         QWidget)
+                         QWidget,QCompleter)
 
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
@@ -49,12 +49,12 @@ from owslib.wfs import WebFeatureService
 from owslib.wms import WebMapService
 from owslib.wmts import WebMapTileService
 
-from MetaSearch import link_types
-from MetaSearch.dialogs.manageconnectionsdialog import ManageConnectionsDialog
-from MetaSearch.dialogs.newconnectiondialog import NewConnectionDialog
-from MetaSearch.dialogs.recorddialog import RecordDialog
-from MetaSearch.dialogs.xmldialog import XMLDialog
-from MetaSearch.util import (get_connections_from_file, get_ui_class,
+from MetaSearch_geocode import link_types
+from MetaSearch_geocode.dialogs.manageconnectionsdialog import ManageConnectionsDialog
+from MetaSearch_geocode.dialogs.newconnectiondialog import NewConnectionDialog
+from MetaSearch_geocode.dialogs.recorddialog import RecordDialog
+from MetaSearch_geocode.dialogs.xmldialog import XMLDialog
+from MetaSearch_geocode.util import (get_connections_from_file, get_ui_class,
                              highlight_xml, normalize_text, open_url,
                              render_template, StaticContext)
 
@@ -131,7 +131,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWhere.textEdited.connect(self.populate_autocomplete)
         # Layer List
 
-        self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
+        self.cmbLayerList.currentIndexChanged.connect(self.set_bbox_from_layer)
+
         # navigation buttons
         self.btnFirst.clicked.connect(self.navigate)
         self.btnPrev.clicked.connect(self.navigate)
@@ -441,37 +442,36 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWest.setText(str(minx)[0:9])
         self.leEast.setText(str(maxx)[0:9])
 
-    def set_bbox_from_layer(self):
+    def set_bbox_from_layer(self,index):
         """ set bounding box from layer"""
+        if index > 0:
+            crsid = self.LayerDic[self.cmbLayerList.itemData(index)][2]
+            bbox = self.LayerDic[self.cmbLayerList.itemData(index)][1]
 
-        idx = self.cmbLayerList.currentIndex()
-        try:
-            crsid = self.LayerDic[self.cmbLayerList.itemData(idx)][2]
-            bbox = self.LayerDic[self.cmbLayerList.itemData(idx)][1]
-        except KeyError:
+
+            if crsid != 4326:  # reproject to EPSG:4326
+                src = QgsCoordinateReferenceSystem(crsid)
+                dest = QgsCoordinateReferenceSystem(4326)
+                xform = QgsCoordinateTransform(src, dest)
+                minxy = xform.transform(QgsPoint(bbox[2],
+                                                 bbox[3]))
+                maxxy = xform.transform(QgsPoint(bbox[0],
+                                                 bbox[1]))
+                minx, miny = minxy
+                maxx, maxy = maxxy
+
+            else:  # 4326
+                minx = bbox[0]
+                maxy = bbox[1]
+                maxx = bbox[2]
+                miny = bbox[3]
+
+            self.leNorth.setText(str(maxy)[0:9])
+            self.leSouth.setText(str(miny)[0:9])
+            self.leWest.setText(str(minx)[0:9])
+            self.leEast.setText(str(maxx)[0:9])
             return
-
-        if crsid != 4326:  # reproject to EPSG:4326
-            src = QgsCoordinateReferenceSystem(crsid)
-            dest = QgsCoordinateReferenceSystem(4326)
-            xform = QgsCoordinateTransform(src, dest)
-            minxy = xform.transform(QgsPoint(bbox[2],
-                                             bbox[3]))
-            maxxy = xform.transform(QgsPoint(bbox[0],
-                                             bbox[1]))
-            minx, miny = minxy
-            maxx, maxy = maxxy
-
-        else:  # 4326
-            minx = bbox[0]
-            maxy = bbox[1]
-            maxx = bbox[2]
-            miny = bbox[3]
-
-        self.leNorth.setText(str(maxy)[0:9])
-        self.leSouth.setText(str(miny)[0:9])
-        self.leWest.setText(str(minx)[0:9])
-        self.leEast.setText(str(maxx)[0:9])
+        self.set_bbox_global()
 
     def set_bbox_global(self):
         """set global bounding box"""
@@ -483,8 +483,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def populate_autocomplete(self):
         """populate the autocomplete list """
 
-        # we're hitting the backspace key, don't spam the service
-        # check /ui/customW/mLineEdit to add more ignore keys
         if self.leWhere.ignore:
             return
 

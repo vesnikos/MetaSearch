@@ -2,8 +2,8 @@
 ###############################################################################
 #
 # Copyright (C) 2010 NextGIS (http://nextgis.org),
-#                    Alexander Bruy (alexander.bruy@gmail.com),
-#                    Maxim Dubinin (sim@gis-lab.info),
+# Alexander Bruy (alexander.bruy@gmail.com),
+# Maxim Dubinin (sim@gis-lab.info),
 #
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
 #
@@ -27,11 +27,13 @@ import os
 import site
 import sys
 
+
+sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), "ui"))
 site.addsitedir(os.path.abspath('%s/ext-libs' % os.path.dirname(__file__)))
 
 
 def classFactory(iface):
     """invoke plugin"""
-    from MetaSearch.plugin import MetaSearchPlugin
+    from plugin import MetaSearchPlugin
     return MetaSearchPlugin(iface)
