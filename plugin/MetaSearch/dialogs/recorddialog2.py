@@ -6,7 +6,7 @@
 # QGIS Catalogue Service client.
 #
 # Copyright (C) 2010 NextGIS (http://nextgis.org),
-#                    Alexander Bruy (alexander.bruy@gmail.com),
+# Alexander Bruy (alexander.bruy@gmail.com),
 #                    Maxim Dubinin (sim@gis-lab.info)
 #
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
@@ -81,7 +81,6 @@ class RecordDialog2(QDialog, BASE_CLASS):
         # Add WMS Layer : Disable for now
         self.btnAddWNSLayer.setEnabled(False)
 
-
         if self.path is not None:
             self.lePath.setText(self.path[0])
             if len(self.path) > 1:  # More than one option
@@ -94,9 +93,9 @@ class RecordDialog2(QDialog, BASE_CLASS):
         self.leTitle.setText(self.record.title)
         if _debug:
             for i in self.uris:
-                self.pteText.appendPlainText(str(i)+"\n")
+                self.pteText.appendPlainText(str(i) + "\n")
             for i in self.referenses:
-                self.pteText.appendPlainText(str(i)+"\n")
+                self.pteText.appendPlainText(str(i) + "\n")
             self.pteText.appendPlainText(self.record.date)
             for i in self.keywords:
                 self.pteText.appendPlainText(i)
