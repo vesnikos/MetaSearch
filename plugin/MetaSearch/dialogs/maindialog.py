@@ -6,8 +6,8 @@
 # QGIS Catalogue Service client.
 #
 # Copyright (C) 2010 NextGIS (http://nextgis.org),
-# Alexander Bruy (alexander.bruy@gmail.com),
-# Maxim Dubinin (sim@gis-lab.info)
+#                    Alexander Bruy (alexander.bruy@gmail.com),
+#                    Maxim Dubinin (sim@gis-lab.info)
 #
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
 #
@@ -28,20 +28,18 @@
 ###############################################################################
 
 import json
-import copy
 import os.path
 from urllib2 import build_opener, install_opener, ProxyHandler
 
-from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
-                       QgsCoordinateTransform, QgsGeometry, QgsPoint,
-                       QgsProviderRegistry, QgsRectangle)
-
-from qgis.gui import QgsRubberBand
-
-from PyQt4.QtCore import (QSettings, Qt, SIGNAL, SLOT)
+from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT
 from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
                          QDialogButtonBox, QMessageBox, QTreeWidgetItem,
-                         QWidget, QCompleter)
+                         QWidget)
+
+from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
+                       QgsCoordinateTransform, QgsGeometry, QgsPoint,
+                       QgsProviderRegistry)
+from qgis.gui import QgsRubberBand
 
 from owslib.csw import CatalogueServiceWeb
 from owslib.fes import BBox, PropertyIsLike
@@ -55,7 +53,6 @@ from MetaSearch import link_types
 from MetaSearch.dialogs.manageconnectionsdialog import ManageConnectionsDialog
 from MetaSearch.dialogs.newconnectiondialog import NewConnectionDialog
 from MetaSearch.dialogs.recorddialog import RecordDialog
-from MetaSearch.dialogs.recorddialog2 import RecordDialog2
 from MetaSearch.dialogs.xmldialog import XMLDialog
 from MetaSearch.util import (get_connections_from_file, get_ui_class,
                              highlight_xml, normalize_text, open_url,
@@ -73,7 +70,6 @@ BASE_CLASS = get_ui_class('maindialog.ui')
 
 class MetaSearchDialog(QDialog, BASE_CLASS):
     """main dialogue"""
-
     def __init__(self, iface):
         """init window"""
 
@@ -92,7 +88,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # CSW Footprint
         self.rubber_band = QgsRubberBand(self.map, True)  # True = a polygon
-        self.rubber_band.setColor(QColor(255, 0, 0, 35))
+        self.rubber_band.setColor(QColor(255, 0, 0, 75))
         self.rubber_band.setWidth(5)
 
         # form inputs
@@ -119,10 +115,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # Search tab
         self.treeRecords.itemSelectionChanged.connect(self.record_clicked)
         self.treeRecords.itemDoubleClicked.connect(self.show_metadata)
-        self.btnSearch.clicked.connect(self.search2)
-        self.btnSearch.setAutoDefault(False)
-        self.leKeywords.returnPressed.connect(self.search2)
-        # Prevent dialog from closing upon pressing enter
+        self.btnSearch.clicked.connect(self.search)
+        self.leKeywords.returnPressed.connect(self.search)
+        # prevent dialog from closing upon pressing enter
         self.buttonBox.button(QDialogButtonBox.Close).setAutoDefault(False)
         # launch help from button
         self.buttonBox.helpRequested.connect(self.help)
@@ -130,18 +125,13 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnCanvasBbox.clicked.connect(self.set_bbox_from_map)
         self.btnGlobalBbox.clicked.connect(self.set_bbox_global)
         self.btnGlobalBbox.setAutoDefault(False)
+
         # Reverse Geocode
-        self.leWhere.returnPressed.connect(self.set_bbox_from_r_geocode)
+
         self.leWhere.textEdited.connect(self.populate_autocomplete)
         # Layer List
+
         self.cmbLayerList.activated.connect(self.set_bbox_from_layer)
-
-
-        # Options tab
-        self.leUsername.editingFinished.connect(self.set_username)
-        self.lePassword.editingFinished.connect(self.set_password)
-
-
         # navigation buttons
         self.btnFirst.clicked.connect(self.navigate)
         self.btnPrev.clicked.connect(self.navigate)
@@ -174,13 +164,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         key = '/MetaSearch/%s' % self.cmbConnectionsSearch.currentText()
         self.catalog_url = self.settings.value('%s/url' % key)
 
-        self.leUsername.setText(
-            self.settings.value('MetaSearch/Options/Username', "Username"))
-
-        self.lePassword.setText(
-            self.settings.value('MetaSearch/Options/Password', "Password"))
-
         self.set_bbox_global()
+
         self.reset_buttons()
 
         # install proxy handler if specified in QGIS settings
@@ -382,19 +367,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     # Settings tab
 
-    def set_username(self):
-        """Set username"""
-        # TODO: More clear: This is the uname of the user who can search the DB for the overlaping geometries
-
-        self.settings.setValue('MetaSearch/Options/Username', self.leUsername.text())
-        print self.settings.value('MetaSearch/Options/Username')
-
-    def set_password(self):
-        """Set Password"""
-        # TODO: More clear: This is the pw of the user who can search the DB for the overlaping geometries
-
-        self.settings.setValue('MetaSearch/Options/Password', self.lePassword.text())
-
     def set_ows_save_title_ask(self):
         """save ows save strategy as save ows title, ask if duplicate"""
 
@@ -411,35 +383,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.settings.setValue('/MetaSearch/ows_save_strategy', 'temp_name')
 
     # Search tab
-
-    def draw_search_footprint(self):
-        pass
-
-    # """Draw BBox visualising the Search extension"""
-    # # TODO figure how to call; also i think there's a bug in the code
-    #
-    # # if the record has a bbox, show a footprint on the map
-    # # ul,ur,lr,ll
-    # points = [
-    # [QgsPoint(float(self.leNorth.text()), float(self.leWest.text())),
-    #         QgsPoint(float(self.leNorth.text()), float(self.leEast.text())),
-    #         QgsPoint(float(self.leSouth.text()), float(self.leEast.text())),
-    #         QgsPoint(float(self.leSouth.text()), float(self.leWest.text()))]
-    #     ]
-    #
-    #     src = QgsCoordinateReferenceSystem(4326)
-    #     dst = self.map.mapRenderer().destinationCrs()
-    #     geom = QgsGeometry.fromPolygon(points)
-    #     if src.authid() != dst.authid():
-    #         ctr = QgsCoordinateTransform(src, dst)
-    #         try:
-    #             geom.transform(ctr)
-    #         except Exception, err:
-    #             QMessageBox.warning(
-    #                 self,
-    #                 self.tr('Coordinate Transformation Error'),
-    #                 str(err))
-    #     self.misc_rubber_band.setToGeometry(geom, None)
 
     def populate_layer_list(self):
         """populate layer list with active layers """
@@ -741,14 +684,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         miny = self.leSouth.text()
         maxx = self.leEast.text()
         maxy = self.leNorth.text()
-
-        # Hack for Geonode:
-        # Geonodes CSW seems to expect y/x coords,
-        # MetaSearch provides at x,y so "Find by BBox" is a no go
-        #
-        # Replace the following to go back to previous functionality
-        # bbox = [minx, miny, maxx, maxy]
-        bbox = [miny, minx, maxy, maxx]
+        bbox = [minx, miny, maxx, maxy]
 
         # only apply spatial filter if bbox is not global
         # even for a global bbox, if a spatial filter is applied, then
@@ -798,18 +734,12 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.treeRecords.clear()
 
-        # HACK
-        # position = self.catalog.results['returned'] + self.startfrom
-        position = len(self.catalog.records) + self.startfrom
+        position = self.catalog.results['returned'] + self.startfrom
 
-        # msg = self.tr('Showing %d - %d of %d result%s') % \
-        #              (self.startfrom + 1, position,
-        #               self.catalog.results['matches'],
-        #               's'[self.catalog.results['matches'] == 1:])
         msg = self.tr('Showing %d - %d of %d result%s') % \
-              (self.startfrom , position,
-               len(self.catalog.records),
-               's'[len(self.catalog.records) == 1:])
+                     (self.startfrom + 1, position,
+                      self.catalog.results['matches'],
+                      's'[self.catalog.results['matches'] == 1:])
 
         self.lblResults.setText(msg)
 
@@ -828,9 +758,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.btnShowXml.setEnabled(True)
 
-        # Hack TODO:Cleanup?
-        # if self.catalog.results["matches"] < self.maxrecords:
-        if len(self.catalog.records) < self.maxrecords:
+        if self.catalog.results["matches"] < self.maxrecords:
             disabled = False
         else:
             disabled = True
@@ -903,7 +831,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             # interactive link types, then set
             if all([link_type is not None,
                     link_type in wmswmst_link_types + wfs_link_types +
-                            wcs_link_types]):
+                    wcs_link_types]):
                 if link_type in wmswmst_link_types:
                     services['wms'] = link['url']
                     self.btnAddToWms.setEnabled(True)
@@ -919,20 +847,15 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def navigate(self):
         """manage navigation / paging"""
 
-        # TODO: FIXME: list of catalog items to show -> crt a list ctlog items, slice 'n' dice, display
-
         caller = self.sender().objectName()
 
         if caller == 'btnFirst':
             self.startfrom = 0
         elif caller == 'btnLast':
-            # self.startfrom = self.catalog.results['matches'] - self.maxrecords
-            self.startfrom = len(self.catalog.records) - self.maxrecords
+            self.startfrom = self.catalog.results['matches'] - self.maxrecords
         elif caller == 'btnNext':
             self.startfrom += self.maxrecords
-            # TODO: Cleanup
-            # if self.startfrom >= self.catalog.results["matches"]:
-            if self.startfrom >= len(self.catalog.records):
+            if self.startfrom >= self.catalog.results["matches"]:
                 msg = self.tr('End of results. Go to start?')
                 res = QMessageBox.information(self, self.tr('Navigation'),
                                               msg,
@@ -951,9 +874,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
                                               (QMessageBox.Ok |
                                                QMessageBox.Cancel))
                 if res == QMessageBox.Ok:
-                    # TODO: Cleanup
-                    #  self.startfrom = (self.catalog.results['matches'] -
-                    self.startfrom = (len(self.catalog.records) -
+                    self.startfrom = (self.catalog.results['matches'] -
                                       self.maxrecords)
                 else:
                     return
@@ -1020,7 +941,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         service_type = stype[0]
 
-        # connect dialog signals to interface slots
+        # connect dialog signals to iface slots
         if service_type == 'OGC:WMS/OGC:WMTS':
             ows_provider.connect(
                 ows_provider,
@@ -1092,39 +1013,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         crd.textMetadata.setHtml(metadata)
         crd.exec_()
 
-    def show_metadata2(self):
-        """show record metadata2"""
-
-        if not self.treeRecords.selectedItems():
-            return
-
-        item = self.treeRecords.currentItem()
-        if not item:
-            return
-
-        identifier = get_item_data(item, 'identifier')
-
-        try:
-            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
-            cat = CatalogueServiceWeb(self.catalog_url, timeout=self.timeout)
-            cat.getrecordbyid(
-                [self.catalog.records[identifier].identifier])
-        except ExceptionReport, err:
-            QApplication.restoreOverrideCursor()
-            QMessageBox.warning(self, self.tr('GetRecords error'),
-                                self.tr('Error getting response: %s') % err)
-            return
-
-        QApplication.restoreOverrideCursor()
-
-        record = cat.records[identifier]
-        record.xml_url = cat.request
-
-        # Parsing at recorddialog2.py
-        crd = RecordDialog2(record=record, iface=self.iface)
-        crd.exec_()
-
-
     def show_xml(self):
         """show XML request / response"""
 
@@ -1167,7 +1055,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         QDialog.reject(self)
         self.rubber_band.reset()
-
 
     def _get_csw(self):
         """convenience function to init owslib.csw.CatalogueServiceWeb"""
@@ -1282,10 +1169,10 @@ def bbox_to_polygon(bbox):
         maxy = float(bbox.maxy)
 
         return [[
-                    QgsPoint(minx, miny),
-                    QgsPoint(minx, maxy),
-                    QgsPoint(maxx, maxy),
-                    QgsPoint(maxx, miny)
-                ]]
+            QgsPoint(minx, miny),
+            QgsPoint(minx, maxy),
+            QgsPoint(maxx, maxy),
+            QgsPoint(maxx, miny)
+        ]]
     else:
         return None
