@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+# region terms_of_use
 ###############################################################################
 #
 # CSW Client
@@ -6,8 +8,8 @@
 # QGIS Catalogue Service client.
 #
 # Copyright (C) 2010 NextGIS (http://nextgis.org),
-#                    Alexander Bruy (alexander.bruy@gmail.com),
-#                    Maxim Dubinin (sim@gis-lab.info)
+# Alexander Bruy (alexander.bruy@gmail.com),
+# Maxim Dubinin (sim@gis-lab.info)
 #
 # Copyright (C) 2014 Tom Kralidis (tomkralidis@gmail.com)
 #
@@ -26,15 +28,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 ###############################################################################
+# endregion
 
 import json
 import os.path
 from urllib2 import build_opener, install_opener, ProxyHandler
 
-from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT
+from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT, QThread, pyqtSignal, pyqtSlot, QObject
 from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
                          QDialogButtonBox, QMessageBox, QTreeWidgetItem,
-                         QWidget,QCompleter)
+                         QWidget, QCompleter)
 
 from qgis.core import (QgsApplication, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsGeometry, QgsPoint,
@@ -55,21 +58,77 @@ from MetaSearch_geocode.dialogs.newconnectiondialog import NewConnectionDialog
 from MetaSearch_geocode.dialogs.recorddialog import RecordDialog
 from MetaSearch_geocode.dialogs.xmldialog import XMLDialog
 from MetaSearch_geocode.util import (get_connections_from_file, get_ui_class,
-                             highlight_xml, normalize_text, open_url,
-                             render_template, StaticContext)
+                                     highlight_xml, normalize_text, open_url,
+                                     render_template, StaticContext)
 
-from geopy_ga.geocoders import Nominatim, GoogleV3
-from geopy_ga.exc import (GeopyError, GeocoderQuotaExceeded,
-                          GeocoderUnavailable, GeocoderTimedOut)
-
-import psycopg2
-
+from geopy.geocoders import Nominatim, GoogleV3
+from geopy.exc import (GeopyError, GeocoderQuotaExceeded,
+                       GeocoderUnavailable, GeocoderTimedOut)
 
 BASE_CLASS = get_ui_class('maindialog.ui')
 
 
+class GeoCoder(QObject):
+    finished = pyqtSignal()
+    dataReady = pyqtSignal(dict)
+
+    def __init__(self, parent=None, api_key=None):
+        super(GeoCoder, self).__init__(parent)
+        finished = pyqtSignal()
+        dataReady = pyqtSignal(dict)
+
+        self.api_key = api_key
+        self.results = {}
+        self.geocoder = self.get_geocoder("googlev3")
+
+    def get_geocoder(self, geocoder_name):
+        if geocoder_name == "googlev3":
+            return GoogleV3(api_key=self.api_key)
+
+    @pyqtSlot(str)
+    def geocode(self, foo=str):
+        data = {}
+        if type(self.geocoder) is GoogleV3:
+            resp = self.geocoder.geocode(foo, exactly_one=False)
+            if type(resp) is list:
+                for location in resp:
+                    data[location.address] = self._geolocator_to_bbox(location.raw)
+            else:
+                data[resp.address] = self._geolocator_to_bbox(resp.raw)
+            self.dataReady.emit(data)
+            # print('worker thread id: {}'.format(int(QThread.currentThreadId())))
+        self.finished.emit()
+
+    def _geolocator_to_bbox(self, resp):
+        """Parses the geolocation service's respond as ullr"""
+
+        if type(self.geocoder) is GoogleV3:
+            maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
+            maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
+            miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
+            minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
+            # elif geolocator_type == "nominatim":
+            # maxx = float(resp[u'boundingbox'][3])
+            # maxy = float(resp[u'boundingbox'][1])
+            # minx = float(resp[u'boundingbox'][2])
+            # miny = float(resp[u'boundingbox'][0])
+            return maxx, maxy, minx, miny
+        # Sometimes the geolocator returns POIs of interest without bbox
+        return None
+
+
 class MetaSearchDialog(QDialog, BASE_CLASS):
     """main dialogue"""
+
+    def show(self):
+        # pre-show checks
+        if self.rbGeolocationService_Google.isChecked() and (self.leApiKey.text() == "" or None):
+            QMessageBox.information(self, self.tr(u"Google API KEY unset"),
+                                    self.tr(u"The document has been modified.\nDo you want to save your changes?"),
+                                    QMessageBox.Ok)
+        # Call the 'real' show
+        super(MetaSearchDialog, self).show()
+
     def __init__(self, iface):
         """init window"""
 
@@ -127,10 +186,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnGlobalBbox.setAutoDefault(False)
 
         # Reverse Geocode
-
+        self.geocoder_thread = QThread()
         self.leWhere.textEdited.connect(self.populate_autocomplete)
-        # Layer List
 
+        # Layer List
         self.cmbLayerList.currentIndexChanged.connect(self.set_bbox_from_layer)
 
         # navigation buttons
@@ -168,6 +227,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.set_bbox_global()
 
         self.reset_buttons()
+
+        self.geocoder = GeoCoder(self, api_key=self.leApiKey.text())
 
         # install proxy handler if specified in QGIS settings
         self.install_proxy()
@@ -388,7 +449,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     def populate_layer_list(self):
         """populate layer list with active layers """
 
-        #TODO: Use the actuall geometry???
+        # TODO: Use the actuall geometry???
 
         # Triggered by overloaded showEvent and MapCanvas.layersChanged
         self.cmbLayerList.clear()
@@ -442,12 +503,11 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWest.setText(str(minx)[0:9])
         self.leEast.setText(str(maxx)[0:9])
 
-    def set_bbox_from_layer(self,index):
+    def set_bbox_from_layer(self, index):
         """ set bounding box from layer"""
         if index > 0:
             crsid = self.LayerDic[self.cmbLayerList.itemData(index)][2]
             bbox = self.LayerDic[self.cmbLayerList.itemData(index)][1]
-
 
             if crsid != 4326:  # reproject to EPSG:4326
                 src = QgsCoordinateReferenceSystem(crsid)
@@ -549,104 +609,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.leWhere.setText(self._geolocator_errors[2])
             self.set_bbox_global()
 
-    def search2(self):
-        self.catalog = None
-        self.constraints = []
-        if self.leWhere.text() != "":
-            self.set_bbox_from_r_geocode()
-
-        # clear all fields and disable buttons
-        self.lblResults.clear()
-        self.treeRecords.clear()
-        self.treeRecords.sortItems(1, Qt.AscendingOrder)
-
-        self.reset_buttons()
-
-        # save some settings
-        self.settings.setValue('/MetaSearch/returnRecords',
-                               self.spnRecords.cleanText())
-
-        # set current catalogue
-        current_text = self.cmbConnectionsSearch.currentText()
-        key = '/MetaSearch/%s' % current_text
-        self.catalog_url = self.settings.value('%s/url' % key)
-
-        # start position and number of records to return
-        self.startfrom = 0
-        self.maxrecords = self.spnRecords.value()
-
-        # set timeout
-        self.timeout = self.spnTimeout.value()
-
-        # bbox
-        minx = self.leWest.text()
-        miny = self.leSouth.text()
-        maxx = self.leEast.text()
-        maxy = self.leNorth.text()
-
-        # FIXME: CRITICAL: Move options to registry
-        conn = psycopg2.connect(database='geonode', host='10.0.31.43', port='5432', user=self.leUsername.text(),
-                                password=self.lePassword.text())
-        WKTbbox = 'POLYGON(({0} {1}, {0} {3}, {2} {3}, {2} {1}, {0} {1}  ))'.format(minx, miny, maxx, maxy)
-
-        # move to bbox
-        # TODO: Refactor
-        # Its global, no point to move the activeview
-
-        bbox = [miny, minx, maxy, maxx]
-        if bbox != ['-90', '-180', '90', '180']:
-            src = QgsCoordinateReferenceSystem(4326)
-            dst = self.map.mapRenderer().destinationCrs()
-            p1, p2 = QgsPoint(float(minx), float(miny)), QgsPoint(float(maxx), float(maxy))
-            xform = QgsCoordinateTransform(src, dst)
-            p1 = xform.transform(p1)
-            p2 = xform.transform(p2)
-            rect = QgsRectangle(p1, p2)
-            self.iface.mapCanvas().setExtent(rect)
-            self.iface.mapCanvas().refresh()
-
-        cur = conn.cursor()
-        cur.execute("""
-          SELECT  uuid from boundaries_test where st_intersects(geom, ST_SetSRID (ST_GeomFromText('{0}'),4326));
-           """.format(WKTbbox)
-        )
-        uuids = []
-        for r in cur:
-            uuids.append(r[0])
-        if len(uuids) == 0:
-            return
-        print uuids
-        # build request
-        if not self._get_csw():
-            return
-
-        # TODO: allow users to select resources types
-        # to find ('service', 'dataset', etc.)
-        # TODO Clean up
-        try:
-            self.catalog.getrecordbyid(id=uuids)
-            self.catalog.getrecords2(maxrecords=self.maxrecords)
-
-        except ExceptionReport, err:
-            QApplication.restoreOverrideCursor()
-            QMessageBox.warning(self, self.tr('Search error'),
-                                self.tr('Search error: %s') % err)
-            return
-        except Exception, err:
-            QApplication.restoreOverrideCursor()
-            QMessageBox.warning(self, self.tr('Connection error'),
-                                self.tr('Connection error: %s') % err)
-            return
-
-        if len(self.catalog.records) == 0:
-            QApplication.restoreOverrideCursor()
-            self.lblResults.setText(self.tr('0 results'))
-            return
-
-        QApplication.restoreOverrideCursor()
-        self.display_results()
-
-
     def search(self):
         """execute search"""
 
@@ -735,9 +697,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         position = self.catalog.results['returned'] + self.startfrom
 
         msg = self.tr('Showing %d - %d of %d result%s') % \
-                     (self.startfrom + 1, position,
-                      self.catalog.results['matches'],
-                      's'[self.catalog.results['matches'] == 1:])
+              (self.startfrom + 1, position,
+               self.catalog.results['matches'],
+               's'[self.catalog.results['matches'] == 1:])
 
         self.lblResults.setText(msg)
 
@@ -829,7 +791,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             # interactive link types, then set
             if all([link_type is not None,
                     link_type in wmswmst_link_types + wfs_link_types +
-                    wcs_link_types]):
+                            wcs_link_types]):
                 if link_type in wmswmst_link_types:
                     services['wms'] = link['url']
                     self.btnAddToWms.setEnabled(True)
@@ -1167,10 +1129,10 @@ def bbox_to_polygon(bbox):
         maxy = float(bbox.maxy)
 
         return [[
-            QgsPoint(minx, miny),
-            QgsPoint(minx, maxy),
-            QgsPoint(maxx, maxy),
-            QgsPoint(maxx, miny)
-        ]]
+                    QgsPoint(minx, miny),
+                    QgsPoint(minx, maxy),
+                    QgsPoint(maxx, maxy),
+                    QgsPoint(maxx, miny)
+                ]]
     else:
         return None

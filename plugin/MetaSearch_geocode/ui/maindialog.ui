@@ -617,7 +617,7 @@
          <x>10</x>
          <y>90</y>
          <width>571</width>
-         <height>81</height>
+         <height>111</height>
         </rect>
        </property>
        <property name="toolTip">
@@ -686,6 +686,35 @@
         </property>
         <property name="text">
          <string>Nominatim (OSM)</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="leApiKey">
+        <property name="geometry">
+         <rect>
+          <x>70</x>
+          <y>70</y>
+          <width>341</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblApiKey">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>70</y>
+          <width>46</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>API KEY : </string>
+        </property>
+        <property name="openExternalLinks">
+         <bool>false</bool>
         </property>
        </widget>
       </widget>

@@ -114,7 +114,6 @@ class MetaSearchPlugin(object):
 
     def run(self):
         """open MetaSearch"""
-        print(os.path.dirname(__file__))
         self.dialog.show()
 
     def help(self):
