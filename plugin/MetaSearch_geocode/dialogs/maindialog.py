@@ -34,7 +34,7 @@ import json
 import os.path
 from urllib2 import build_opener, install_opener, ProxyHandler
 
-from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT, QThread, pyqtSignal, pyqtSlot, QObject
+from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT, QThread, pyqtSignal, pyqtSlot, QObject, QMetaObject, Q_ARG
 from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
                          QDialogButtonBox, QMessageBox, QTreeWidgetItem,
                          QWidget, QCompleter)
@@ -99,33 +99,30 @@ class GeoCoder(QObject):
             # print('worker thread id: {}'.format(int(QThread.currentThreadId())))
         self.finished.emit()
 
-    def _geolocator_to_bbox(self, resp):
+    def _geolocator_to_bbox(self, response):
         """Parses the geolocation service's respond as ullr"""
 
+        maxx = maxy = minx = miny = None
+
         if type(self.geocoder) is GoogleV3:
-            maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
-            maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
-            miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
-            minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
+            if 'bounds' in response[u'geometry']:
+                maxy = float(response[u"geometry"][u"bounds"][u"northeast"][u"lat"])
+                maxx = float(response[u"geometry"][u"bounds"][u"northeast"][u"lng"])
+                miny = float(response[u"geometry"][u"bounds"][u"southwest"][u"lat"])
+                minx = float(response[u"geometry"][u"bounds"][u"southwest"][u"lng"])
             # elif geolocator_type == "nominatim":
             # maxx = float(resp[u'boundingbox'][3])
             # maxy = float(resp[u'boundingbox'][1])
             # minx = float(resp[u'boundingbox'][2])
             # miny = float(resp[u'boundingbox'][0])
-            return maxx, maxy, minx, miny
-        # Sometimes the geolocator returns POIs of interest without bbox
-        return None
+        return maxx, maxy, minx, miny
+
 
 
 class MetaSearchDialog(QDialog, BASE_CLASS):
     """main dialogue"""
 
     def show(self):
-        # pre-show checks
-        if self.rbGeolocationService_Google.isChecked() and (self.leApiKey.text() == "" or None):
-            QMessageBox.information(self, self.tr(u"Google API KEY unset"),
-                                    self.tr(u"The document has been modified.\nDo you want to save your changes?"),
-                                    QMessageBox.Ok)
         # Call the 'real' show
         super(MetaSearchDialog, self).show()
 
@@ -186,8 +183,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnGlobalBbox.setAutoDefault(False)
 
         # Reverse Geocode
-        self.geocoder_thread = QThread()
-        self.leWhere.textEdited.connect(self.populate_autocomplete)
+        self.geocoder_thread = None
+        self.geocoder = GeoCoder(self, api_key=self.leApiKey.text())
+        self.geocoder.dataReady.connect(self.populate_autocomplete)
+        self.leWhere.textEdited.connect(self.get_addresses)
 
         # Layer List
         self.cmbLayerList.currentIndexChanged.connect(self.set_bbox_from_layer)
@@ -228,12 +227,21 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.reset_buttons()
 
-        self.geocoder = GeoCoder(self, api_key=self.leApiKey.text())
-
         # install proxy handler if specified in QGIS settings
         self.install_proxy()
 
+    def hideEvent(self, *args, **kwargs):
+        self.geocoder_thread.quit()
+
     def showEvent(self, QShowEvent):
+        # pre-show checks
+        self.geocoder_thread = QThread()
+        self.geocoder.moveToThread(self.geocoder_thread)
+        self.geocoder_thread.start()
+        if self.rbGeolocationService_Google.isChecked() and (self.leApiKey.text() == "" or None):
+            QMessageBox.information(self, self.tr(u"Google API KEY unset"),
+                                    self.tr(u"The document has been modified.\nDo you want to save your changes?"),
+                                    QMessageBox.Ok)
         self.populate_layer_list()
 
     # Servers tab
@@ -540,34 +548,40 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWest.setText('-180')
         self.leEast.setText('180')
 
-    def populate_autocomplete(self):
+    def get_addresses(self, where_text):
+        if len(where_text) > 4:
+            QMetaObject.invokeMethod(self.geocoder, 'geocode', Qt.QueuedConnection,
+                                     Q_ARG(str, where_text)
+                                     )
+
+    def populate_autocomplete(self, locations):
         """populate the autocomplete list """
+        #
+        # if self.leWhere.ignore:
+        #     return
+        #
+        # if len(self.leWhere.text()) < 4:  # Start working after 3 chars
+        #     self.leWhere.setCompleter(None)
+        #     return
+        #
+        # if any(map(lambda foo: self.leWhere.text().lower()[:5] in foo.lower(),
+        #            self._geolocator_errors)):
+        #     self.leWhere.setCompleter(None)
+        #     return  # The first 5 letters of the error message is in the text
 
-        if self.leWhere.ignore:
-            return
+        # if self.rbGeolocationService_Google.isChecked():
+        # geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
+        # geotype = "googlev3"
+        # elif self.rbGeolocationService_OSM.isChecked():
+        #     geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
+        #     geotype = "nominatim"
+        # # A list of geopy.Locations
+        # locations = geolocator.geocode(self.leWhere.text(), exactly_one=False)
 
-        if len(self.leWhere.text()) < 4:  # Start working after 3 chars
-            self.leWhere.setCompleter(None)
-            return
-
-        if any(map(lambda foo: self.leWhere.text().lower()[:5] in foo.lower(),
-                   self._geolocator_errors)):
-            self.leWhere.setCompleter(None)
-            return  # The first 5 letters of the error message is in the text
-
-        if self.rbGeolocationService_Google.isChecked():
-            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
-            geotype = "googlev3"
-        elif self.rbGeolocationService_OSM.isChecked():
-            geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
-            geotype = "nominatim"
-        # A list of geopy.Locations
-        locations = geolocator.geocode(self.leWhere.text(), exactly_one=False)
         self.completerList = []
-        if locations is not None:
+        if len(locations) > 0:
             for l in locations:
-                if geolocator_to_bbox(geotype, l.raw):
-                    self.completerList.append(unicode(l.address))
+                self.completerList.append(unicode(l.address))
         self.completer = QCompleter(self.completerList, self)
         self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
