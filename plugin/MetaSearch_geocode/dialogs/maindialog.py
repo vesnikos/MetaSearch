@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+import pydevd
+pydevd.settrace('localhost', port=53100, stdoutToServer=True, stderrToServer=True)
+# pydevd.settrace('localhost', port=$SERVER_PORT, stdoutToServer=True, stderrToServer=True)
 # region terms_of_use
 ###############################################################################
 #
@@ -34,7 +36,7 @@ import json
 import os.path
 from urllib2 import build_opener, install_opener, ProxyHandler
 
-from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT, QThread, pyqtSignal, pyqtSlot, QObject
+from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT, QThread, pyqtSignal, pyqtSlot, QObject,QMetaObject,Q_ARG
 from PyQt4.QtGui import (QApplication, QColor, QCursor, QDialog,
                          QDialogButtonBox, QMessageBox, QTreeWidgetItem,
                          QWidget, QCompleter)
@@ -71,12 +73,10 @@ BASE_CLASS = get_ui_class('maindialog.ui')
 class GeoCoder(QObject):
     finished = pyqtSignal()
     dataReady = pyqtSignal(dict)
+    error = pyqtSignal()
 
     def __init__(self, parent=None, api_key=None):
         super(GeoCoder, self).__init__(parent)
-        finished = pyqtSignal()
-        dataReady = pyqtSignal(dict)
-
         self.api_key = api_key
         self.results = {}
         self.geocoder = self.get_geocoder("googlev3")
@@ -89,29 +89,35 @@ class GeoCoder(QObject):
     def geocode(self, foo=str):
         data = {}
         if type(self.geocoder) is GoogleV3:
-            resp = self.geocoder.geocode(foo, exactly_one=False)
-            if type(resp) is list:
-                for location in resp:
-                    data[location.address] = self._geolocator_to_bbox(location.raw)
-            else:
-                data[resp.address] = self._geolocator_to_bbox(resp.raw)
+            try:
+                response = self.geocoder.geocode(foo, exactly_one=False)
+                if type(response) is list and len(response) > 0:
+                    for location in response:
+                        data[location.address] = self._geolocator_to_bbox(location.raw)
+                else:
+                    data[resp.address] = self._geolocator_to_bbox(resp.raw)
+            except:
+                pass
             self.dataReady.emit(data)
-            # print('worker thread id: {}'.format(int(QThread.currentThreadId())))
+            print('worker thread id: {}'.format(int(QThread.currentThreadId())))
         self.finished.emit()
 
-    def _geolocator_to_bbox(self, resp):
+    def _geolocator_to_bbox(self, response):
         """Parses the geolocation service's respond as ullr"""
 
+        maxx = maxy = minx = miny = None
+
         if type(self.geocoder) is GoogleV3:
-            maxy = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lat"])
-            maxx = float(resp[u"geometry"][u"bounds"][u"northeast"][u"lng"])
-            miny = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lat"])
-            minx = float(resp[u"geometry"][u"bounds"][u"southwest"][u"lng"])
-            # elif geolocator_type == "nominatim":
-            # maxx = float(resp[u'boundingbox'][3])
-            # maxy = float(resp[u'boundingbox'][1])
-            # minx = float(resp[u'boundingbox'][2])
-            # miny = float(resp[u'boundingbox'][0])
+            if u'bounds'in response[u'geometry'] :
+                maxy = float(response[u"geometry"][u"bounds"][u"northeast"][u"lat"])
+                maxx = float(response[u"geometry"][u"bounds"][u"northeast"][u"lng"])
+                miny = float(response[u"geometry"][u"bounds"][u"southwest"][u"lat"])
+                minx = float(response[u"geometry"][u"bounds"][u"southwest"][u"lng"])
+                # elif geolocator_type == "nominatim":
+                    # maxx = float(resp[u'boundingbox'][3])
+                    # maxy = float(resp[u'boundingbox'][1])
+                    # minx = float(resp[u'boundingbox'][2])
+                    # miny = float(resp[u'boundingbox'][0])
             return maxx, maxy, minx, miny
         # Sometimes the geolocator returns POIs of interest without bbox
         return None
@@ -121,13 +127,11 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
     """main dialogue"""
 
     def show(self):
-        # pre-show checks
-        if self.rbGeolocationService_Google.isChecked() and (self.leApiKey.text() == "" or None):
-            QMessageBox.information(self, self.tr(u"Google API KEY unset"),
-                                    self.tr(u"The document has been modified.\nDo you want to save your changes?"),
-                                    QMessageBox.Ok)
         # Call the 'real' show
         super(MetaSearchDialog, self).show()
+
+    def mPrint(self,str):
+        print str
 
     def __init__(self, iface):
         """init window"""
@@ -142,8 +146,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.catalog_url = None
         self.context = StaticContext()
         self.LayerDic = {}
-        self.completerList = []
-        self.completer = None
+        self.Locations = {}
 
         # CSW Footprint
         self.rubber_band = QgsRubberBand(self.map, True)  # True = a polygon
@@ -187,7 +190,8 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # Reverse Geocode
         self.geocoder_thread = QThread()
-        self.leWhere.textEdited.connect(self.populate_autocomplete)
+        self.geocoder = None
+        self.leWhere.textEdited.connect(self.get_locations)
 
         # Layer List
         self.cmbLayerList.currentIndexChanged.connect(self.set_bbox_from_layer)
@@ -212,6 +216,20 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.manageGui()
 
+    def get_locations(self,location):
+        if len(location) > 3 :
+            self.geocoder = self.geocoder = GeoCoder(self, api_key="AIzaSyCQRcZEh30s_sxvkc73pNoBi8uBN2pJifg")
+            self.leWhere.textEdited.connect(self.get_locations)
+            self.geocoder.dataReady.connect(self.populate_autocomplete)
+            self.geocoder.finished.connect(self.geocoder_thread.quit)
+            self.geocoder.moveToThread(self.geocoder_thread)
+            self.geocoder_thread.start()
+
+            QMetaObject.invokeMethod(self.geocoder,"geocode",Qt.QueuedConnection,
+                                     Q_ARG(str,self.leWhere.text())
+            )
+
+
     def manageGui(self):
         """open window"""
 
@@ -228,13 +246,20 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         self.reset_buttons()
 
-        self.geocoder = GeoCoder(self, api_key=self.leApiKey.text())
-
         # install proxy handler if specified in QGIS settings
         self.install_proxy()
 
     def showEvent(self, QShowEvent):
+        # pre-show checks
+        # if self.rbGeolocationService_Google.isChecked() and (self.leApiKey.text() == "" or None):
+        #     QMessageBox.information(self, self.tr(u"Google API KEY unset"),
+        #                             self.tr(u"..."),
+        #                             QMessageBox.Ok)
+
         self.populate_layer_list()
+
+    def hideEvent(self, *args, **kwargs):
+        pass
 
     # Servers tab
 
@@ -540,74 +565,73 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWest.setText('-180')
         self.leEast.setText('180')
 
-    def populate_autocomplete(self):
+    def populate_autocomplete(self,dict):
         """populate the autocomplete list """
+        #
+        # if self.leWhere.ignore:
+        #     return
+        #
+        # if len(self.leWhere.text()) < 4:  # Start working after 3 chars
+        #     self.leWhere.setCompleter(None)
+        #     return
+        #
+        # if any(map(lambda foo: self.leWhere.text().lower()[:5] in foo.lower(),
+        #            self._geolocator_errors)):
+        #     self.leWhere.setCompleter(None)
+        #     return  # The first 5 letters of the error message is in the text
+        #
+        # if self.rbGeolocationService_Google.isChecked()qgis:
+        #     geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
+        #     geotype = "googlev3"
+        # elif self.rbGeolocationService_OSM.isChecked():
+        #     geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
+        #     geotype = "nominatim"
+        # # A list of geopy.Locations
+        # locations = geolocator.geocode(self.leWhere.text(), exactly_one=False)
+        # self.completerList = []
+        # if locations is not None:
+        #     for l in locations:
+        #         if geolocator_to_bbox(geotype, l.raw):
+        #             self.completerList.append(unicode(l.address))
+        self.Locations = dict
 
-        if self.leWhere.ignore:
-            return
-
-        if len(self.leWhere.text()) < 4:  # Start working after 3 chars
-            self.leWhere.setCompleter(None)
-            return
-
-        if any(map(lambda foo: self.leWhere.text().lower()[:5] in foo.lower(),
-                   self._geolocator_errors)):
-            self.leWhere.setCompleter(None)
-            return  # The first 5 letters of the error message is in the text
-
-        if self.rbGeolocationService_Google.isChecked():
-            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
-            geotype = "googlev3"
-        elif self.rbGeolocationService_OSM.isChecked():
-            geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
-            geotype = "nominatim"
-        # A list of geopy.Locations
-        locations = geolocator.geocode(self.leWhere.text(), exactly_one=False)
-        self.completerList = []
-        if locations is not None:
-            for l in locations:
-                if geolocator_to_bbox(geotype, l.raw):
-                    self.completerList.append(unicode(l.address))
-        self.completer = QCompleter(self.completerList, self)
-        self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
-        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
-        self.leWhere.setCompleter(self.completer)
 
     def set_bbox_from_r_geocode(self):
         """set bounding box from reverse geolocation"""
 
-        if self.rbGeolocationService_Google.isChecked():
-            # List of google domains:
-            # http://en.wikipedia.org/wiki/List_of_Google_domains
-            geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
-            geotype = "googlev3"
-
-        elif self.rbGeolocationService_OSM.isChecked():
-            geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
-            geotype = "nominatim"
-
-        try:
-            location = geolocator.geocode(self.leWhere.text())
-            ullr = geolocator_to_bbox(geolocator_type=geotype,
-                                      resp=location.raw)
-            self.leWhere.setText(location.address)
-            # hackish way parsing results
-            maxx, maxy, minx, miny = ullr
-
-            # set radius of BBox
-            self.leNorth.setText(str(maxy))
-            self.leSouth.setText(str(miny))
-            self.leWest.setText(str(minx))
-            self.leEast.setText(str(maxx))
-        except (GeocoderTimedOut, GeocoderUnavailable):
-            self.leWhere.setText(self._geolocator_errors[0])
-            self.set_bbox_global()
-        except GeocoderQuotaExceeded:
-            self.leWhere.setText(self._geolocator_errors[1])
-            self.set_bbox_global()
-        except (GeopyError, AttributeError, KeyError, TypeError):
-            self.leWhere.setText(self._geolocator_errors[2])
-            self.set_bbox_global()
+        # if self.rbGeolocationService_Google.isChecked():
+        #     # List of google domains:
+        #     # http://en.wikipedia.org/wiki/List_of_Google_domains
+        #     geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
+        #     geotype = "googlev3"
+        #
+        # elif self.rbGeolocationService_OSM.isChecked():
+        #     geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
+        #     geotype = "nominatim"
+        #
+        # try:
+        #     location = geolocator.geocode(self.leWhere.text())
+        #     ullr = geolocator_to_bbox(geolocator_type=geotype,
+        #                               resp=location.raw)
+        #     self.leWhere.setText(location.address)
+        #     # hackish way parsing results
+        #     maxx, maxy, minx, miny = ullr
+        #
+        #     # set radius of BBox
+        #     self.leNorth.setText(str(maxy))
+        #     self.leSouth.setText(str(miny))
+        #     self.leWest.setText(str(minx))
+        #     self.leEast.setText(str(maxx))
+        # except (GeocoderTimedOut, GeocoderUnavailable):
+        #     self.leWhere.setText(self._geolocator_errors[0])
+        #     self.set_bbox_global()
+        # except GeocoderQuotaExceeded:
+        #     self.leWhere.setText(self._geolocator_errors[1])
+        #     self.set_bbox_global()
+        # except (GeopyError, AttributeError, KeyError, TypeError):
+        #     self.leWhere.setText(self._geolocator_errors[2])
+        #     self.set_bbox_global()
+        pass
 
     def search(self):
         """execute search"""
