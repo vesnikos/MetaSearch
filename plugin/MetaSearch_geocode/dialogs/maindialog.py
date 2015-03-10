@@ -28,13 +28,11 @@
 #
 ###############################################################################
 # endregion
-import sys
-sys.path.append(r"C:\Users\nikos\PycharmProjects\MetaSearch\plugin\MetaSearch_geocode\ext-libs\pydevd")
 
-import pydevd
-pydevd.settrace('localhost', port=53100, stdoutToServer=True, stderrToServer=True,suspend=False)
-import json
+
 import os.path
+import json
+import time
 from urllib2 import build_opener, install_opener, ProxyHandler
 
 from PyQt4.QtCore import QSettings, Qt, SIGNAL, SLOT, QThread, pyqtSignal, pyqtSlot, QObject, QMetaObject, Q_ARG, QMutex
@@ -115,6 +113,7 @@ class GeoCoder_Worker(QThread):
 
     @pyqtSlot(str)
     def geocode(self):
+        print('worker thread id: {0}'.format(int(QThread.currentThreadId())))
         data = {}
         if type(self.geocoder) is GoogleV3:
             try:
@@ -128,8 +127,6 @@ class GeoCoder_Worker(QThread):
                 pass
             self.dataReady.emit(data)
             self.completed = True
-
-            print('worker thread id: {}'.format(int(QThread.currentThreadId())))
             print data
         self.finished.emit(self.completed)
 
@@ -144,11 +141,6 @@ class GeoCoder_Worker(QThread):
                 maxx = float(response[u"geometry"][u"bounds"][u"northeast"][u"lng"])
                 miny = float(response[u"geometry"][u"bounds"][u"southwest"][u"lat"])
                 minx = float(response[u"geometry"][u"bounds"][u"southwest"][u"lng"])
-                # elif geolocator_type == "nominatim":
-                # maxx = float(resp[u'boundingbox'][3])
-                # maxy = float(resp[u'boundingbox'][1])
-                # minx = float(resp[u'boundingbox'][2])
-                # miny = float(resp[u'boundingbox'][0])
             return maxx, maxy, minx, miny
         # Sometimes the geolocator returns POIs of interest without bbox
         return None
@@ -620,7 +612,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         #     for l in locations:
         #         if geolocator_to_bbox(geotype, l.raw):
         #             self.completerList.append(unicode(l.address))
-        print dict
         self.Locations = dict
 
 
