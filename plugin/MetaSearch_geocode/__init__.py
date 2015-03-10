@@ -32,8 +32,8 @@ sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), "ui"))
 site.addsitedir(os.path.abspath('%s/ext-libs' % os.path.dirname(__file__)))
 
-import pydevd
-pydevd.settrace('localhost', port=53100, stdoutToServer=True, stderrToServer=True, suspend=False)
+# import pydevd
+# pydevd.settrace('localhost', port=53100, stdoutToServer=True, stderrToServer=True, suspend=False)
 
 def classFactory(iface):
     """invoke plugin"""

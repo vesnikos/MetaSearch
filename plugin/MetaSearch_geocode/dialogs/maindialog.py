@@ -70,9 +70,9 @@ BASE_CLASS = get_ui_class('maindialog.ui')
 
 
 class GeoCoder_Worker(QThread):
-
     finished = pyqtSignal(bool)
     dataReady = pyqtSignal(dict)
+    error = pyqtSignal(object)
 
     def __init__(self, parent=None, api_key=None):
         super(GeoCoder_Worker, self).__init__(parent)
@@ -123,12 +123,11 @@ class GeoCoder_Worker(QThread):
                         data[location.address] = self._geolocator_to_bbox(location.raw)
                 else:
                     data[response.address] = self._geolocator_to_bbox(response.raw)
-            except:
-                pass
-            self.dataReady.emit(data)
+                self.dataReady.emit(data)
+            except BaseException as e:
+                self.error.emit(e)
             self.completed = True
-            print data
-        self.finished.emit(self.completed)
+            # print data
 
     def _geolocator_to_bbox(self, response):
         """Parses the geolocation service's respond as ullr"""
@@ -212,9 +211,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.btnGlobalBbox.setAutoDefault(False)
 
         # Reverse Geocode
-        # self.geocoder_thread = QThread()
         self.geocoder = GeoCoder_Worker(self, api_key="AIzaSyCQRcZEh30s_sxvkc73pNoBi8uBN2pJifg")
         self.geocoder.dataReady.connect(self.populate_autocomplete)
+        self.geocoder.error.connect(self.geocoder_error)
         self.leWhere.textEdited.connect(self.get_locations)
 
         # Layer List
@@ -272,7 +271,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # pre-show checks
         # if self.rbGeolocationService_Google.isChecked() and (self.leApiKey.text() == "" or None):
         # QMessageBox.information(self, self.tr(u"Google API KEY unset"),
-        #                             self.tr(u"..."),
+        # self.tr(u"..."),
         #                             QMessageBox.Ok)
 
         self.populate_layer_list()
@@ -584,6 +583,10 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leWest.setText('-180')
         self.leEast.setText('180')
 
+
+    def geocoder_error(self, e):
+        self.leWhere.setText("{}".format(e.__class__.__name__))
+
     def populate_autocomplete(self, dict):
         """populate the autocomplete list """
         #
@@ -591,7 +594,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # return
         #
         # if len(self.leWhere.text()) < 4:  # Start working after 3 chars
-        #     self.leWhere.setCompleter(None)
+        # self.leWhere.setCompleter(None)
         #     return
         #
         # if any(map(lambda foo: self.leWhere.text().lower()[:5] in foo.lower(),
@@ -612,7 +615,19 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         #     for l in locations:
         #         if geolocator_to_bbox(geotype, l.raw):
         #             self.completerList.append(unicode(l.address))
+        # error checking
+
+
+        print("populate_autocomplete: dict:\n\tlen: {0}".format(len(dict)))
         self.Locations = dict
+
+        if len(self.Locations) < 0 or len(self.leWhere.text()) < 3:
+            self.leWhere.setCompleter(None)
+            return
+
+        completer = QCompleter(self.Locations.keys())
+        completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+        self.leWhere.setCompleter(completer)
 
 
     def set_bbox_from_r_geocode(self):
@@ -620,7 +635,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         # if self.rbGeolocationService_Google.isChecked():
         # # List of google domains:
-        #     # http://en.wikipedia.org/wiki/List_of_Google_domains
+        # # http://en.wikipedia.org/wiki/List_of_Google_domains
         #     geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
         #     geotype = "googlev3"
         #
