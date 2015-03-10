@@ -62,8 +62,8 @@ from MetaSearch_geocode.util import (get_connections_from_file, get_ui_class,
                                      render_template, StaticContext)
 
 from geopy.geocoders import Nominatim, GoogleV3
-from geopy.exc import (GeopyError, GeocoderQuotaExceeded,
-                       GeocoderUnavailable, GeocoderTimedOut)
+# from geopy.exc import (GeopyError, GeocoderQuotaExceeded,
+#                        GeocoderUnavailable, GeocoderTimedOut)
 
 BASE_CLASS = get_ui_class('maindialog.ui')
 
@@ -126,7 +126,7 @@ class GeoCoder_Worker(QThread):
                 else:
                     data[response.address] = self._geolocator_to_bbox(response.raw)
                 self.dataReady.emit(data)
-            except Exception as e:
+            except Exception, e:
                 self.error.emit(e)
             self.completed = True
             # print data
@@ -478,7 +478,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
     def save_api_key(self):
 
-        self.settings.setValue('/MetaSearch/api_key', self.leApiKey.text())
+        key = self.leApiKey.text()
+        self.settings.setValue('/MetaSearch/api_key', key)
+        self.geocoder = GeoCoder_Worker(self,api_key=key)
 
     def set_ows_save_title_ask(self):
         """save ows save strategy as save ows title, ask if duplicate"""
