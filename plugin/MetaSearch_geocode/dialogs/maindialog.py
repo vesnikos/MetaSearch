@@ -62,8 +62,7 @@ from MetaSearch_geocode.util import (get_connections_from_file, get_ui_class,
                                      render_template, StaticContext)
 
 from geopy.geocoders import Nominatim, GoogleV3
-# from geopy.exc import (GeopyError, GeocoderQuotaExceeded,
-#                        GeocoderUnavailable, GeocoderTimedOut)
+from geopy.exc import *
 
 BASE_CLASS = get_ui_class('maindialog.ui')
 
@@ -77,12 +76,20 @@ class GeoCoder_Worker(QThread):
         super(GeoCoder_Worker, self).__init__(parent)
 
         self.mutex = QMutex()
-        self.api_key = api_key
+        self._api_key = api_key
         self.query = ""
-        self.results = {}
         self.stopped = False
         self.completed = False
         self.geocoder = self.get_geocoder("googlev3")
+        self.data = {}
+
+    @property
+    def api_key(self):
+        return self._api_key
+
+    @api_key.setter
+    def api_key(self, api_key):
+        self._api_key = api_key
 
     def initialize(self, query):
         self.query = query
@@ -94,9 +101,9 @@ class GeoCoder_Worker(QThread):
             return GoogleV3(api_key=self.api_key)
 
     def run(self):
-        self.geocode()
-        self.stop()
-        self.finished.emit(self.completed)
+            self.geocode()
+            self.stop()
+            self.finished.emit(self.completed)
 
     def stop(self):
         try:
@@ -113,23 +120,27 @@ class GeoCoder_Worker(QThread):
             self.mutex.unlock()
 
     def geocode(self):
-        # print('worker thread id: {0}'.format(int(QThread.currentThreadId())))
-        data = {}
+        print('worker thread id: {0}\t\tApi Key: {1}'.format(int(QThread.currentThreadId()), self.api_key))
+        self.data = {}
         if type(self.geocoder) is GoogleV3:
             try:
                 response = self.geocoder.geocode(self.query, exactly_one=False)
-                if response is None:
-                    return
+                # List of geopy.Locations -> dict
                 if type(response) is list:
                     for location in response:
-                        data[location.address] = self._geolocator_to_bbox(location.raw)
+                        self.data[location.address] = self._geolocator_to_bbox(location.raw)
                 else:
-                    data[response.address] = self._geolocator_to_bbox(response.raw)
-                self.dataReady.emit(data)
-            except Exception, e:
-                self.error.emit(e)
-            self.completed = True
-            # print data
+                    self.data[response.address] = self._geolocator_to_bbox(response.raw)
+            except (ConfigurationError, GeocoderAuthenticationFailure, GeocoderInsufficientPrivileges,
+                    GeocoderNotFound, GeocoderParseError, GeocoderQueryError, GeocoderQuotaExceeded,
+                    GeocoderServiceError, GeocoderTimedOut, GeocoderUnavailable, GeopyError) as e:
+                self.error.emit(e.__class__.__name__)
+
+            except BaseException as e:
+                self.error.emit(e.__class__.__name__)
+        self.dataReady.emit(self.data)
+        self.completed = True
+        # print(data)
 
     def _geolocator_to_bbox(self, response):
         """Parses the geolocation service's respond as ullr"""
@@ -147,13 +158,6 @@ class GeoCoder_Worker(QThread):
 
 class MetaSearchDialog(QDialog, BASE_CLASS):
     """main dialogue"""
-
-    def show(self):
-        # Call the 'real' show
-        super(MetaSearchDialog, self).show()
-
-    def mPrint(self, str):
-        print str
 
     def __init__(self, iface):
         """init window"""
@@ -215,6 +219,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.geocoder = GeoCoder_Worker(self)
         self.geocoder.dataReady.connect(self.populate_autocomplete)
         self.geocoder.error.connect(self.geocoder_error)
+        self.geocoder.error.connect(self.mPrint)
         self.leWhere.textEdited.connect(self.get_locations)
 
         # Layer List
@@ -239,15 +244,29 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             self.tr(u"Error: Using Global Coverage")]
 
         self.manageGui()
+    # Misc
+
+    def show(self):
+        """Default overload for .show()"""
+
+        # Call the 'real' show
+        super(MetaSearchDialog, self).show()
+
+    def mPrint(self, str):
+        print "hiho"
 
     def get_locations(self, location):
+        """ Geolocates a location"""
+
+        api_key = self.settings.value('/MetaSearch/api_key')
+        self.geocoder.api_key = api_key
         if len(location) > 3:
             if self.geocoder.isRunning():
                 self.geocoder.terminate()
-
             self.geocoder.initialize(location)
             self.geocoder.start()
 
+        return
 
     def manageGui(self):
         """open window"""
@@ -261,9 +280,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         key = '/MetaSearch/%s' % self.cmbConnectionsSearch.currentText()
         self.catalog_url = self.settings.value('%s/url' % key)
 
-        key = '/MetaSearch/api_key'
-        self.leApiKey.setText(self.settings.value(key))
-        self.geocoder = GeoCoder_Worker(self, api_key=self.leApiKey.text())
+        api_key = '/MetaSearch/api_key'
+        self.leApiKey.setText(self.settings.value(api_key))
+        self.geocoder.api_key = api_key
 
         self.set_bbox_global()
 
@@ -273,10 +292,15 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.install_proxy()
 
     def showEvent(self, QShowEvent):
+        """Pre-Show checks"""
+
         # pre-show checks
         if self.rbGeolocationService_Google.isChecked() and (self.leApiKey.text() == "" or None):
             QMessageBox.information(self, self.tr(u"Google API KEY unset"),
-                                    self.tr(u"..."), QMessageBox.Ok)
+                                    self.tr(
+                                        u"Google Geolocation API KEY is missing. The module will function \n"
+                                        u"ewith public interface but it has limitations"),
+                                    QMessageBox.Ok)
 
         self.populate_layer_list()
 
@@ -480,7 +504,6 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
 
         key = self.leApiKey.text()
         self.settings.setValue('/MetaSearch/api_key', key)
-        self.geocoder = GeoCoder_Worker(self,api_key=key)
 
     def set_ows_save_title_ask(self):
         """save ows save strategy as save ows title, ask if duplicate"""
@@ -540,9 +563,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
             dest = QgsCoordinateReferenceSystem(4326)
             xform = QgsCoordinateTransform(src, dest)
             minxy = xform.transform(QgsPoint(extent.xMinimum(),
-                                             extent.yMinimum()))
+                extent.yMinimum()))
             maxxy = xform.transform(QgsPoint(extent.xMaximum(),
-                                             extent.yMaximum()))
+                extent.yMaximum()))
             minx, miny = minxy
             maxx, maxy = maxxy
         else:  # 4326
@@ -594,8 +617,9 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         self.leEast.setText('180')
 
     def geocoder_error(self, e):
-        self.leWhere.setText("{}".format(e.__class__.__name__))
-        raise e
+        """handle geocoder error"""
+
+        self.leWhere.setText("{}".format(e))
 
     def populate_autocomplete(self, dict):
         """populate the autocomplete list """
@@ -608,7 +632,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # return
         #
         # if any(map(lambda foo: self.leWhere.text().lower()[:5] in foo.lower(),
-        #            self._geolocator_errors)):
+        # self._geolocator_errors)):
         #     self.leWhere.setCompleter(None)
         #     return  # The first 5 letters of the error message is in the text
         #
@@ -628,7 +652,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # error checking
 
 
-        # print("populate_autocomplete: dict:\tlen: {0}".format(len(dict)))
+        print("populate_autocomplete: dict:\tlen: {0}".format(len(dict)))
         self.Locations = dict
 
         if len(self.Locations) < 0 or len(self.leWhere.text()) < 3:
@@ -646,7 +670,7 @@ class MetaSearchDialog(QDialog, BASE_CLASS):
         # # List of google domains:
         # # http://en.wikipedia.org/wiki/List_of_Google_domains
         # geolocator = GoogleV3(timeout=4, domain="maps.google.gr")
-        #     geotype = "googlev3"
+        # geotype = "googlev3"
         #
         # elif self.rbGeolocationService_OSM.isChecked():
         #     geolocator = Nominatim(view_box=(-180, -90, 180, 90), timeout=4)
